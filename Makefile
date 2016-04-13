@@ -10,9 +10,14 @@ CC = gcc
 # -Wall  turns on most, but not all compiler warnings
 CFLAGS = -g -Wall
 
+LDFLAGS = -fPIC -shared  # linking flags
+
 # define any directories containing header files other than /usr/include
 #
 INCLUDES =
+
+TCLINC=/usr/include/tcl8.6
+TCLLIB=/usr/lib/x86_64-linux-gnu
 
 #define the C header files
 HDRS = databox.h error.h factorsafety.h file.h fstools.h general.h \
@@ -28,7 +33,7 @@ SRCS = factorsafety.c fstools.c fsappinit.c databox.c error.c file.c \
 OBJS = $(SRCS:.c=.o)
 
 #define the executable file
-MAIN = myfactorsafety
+MAIN = myfactorsafety.so
 
 default: install 
 
@@ -36,7 +41,7 @@ all:	$(MAIN)
 		@echo Simple compiler named myfactorsafety has been compiled
 
 $(MAIN):	$(OBJS)
-			$(CC) $(CFLAGS) $(INCLUDES) -o $(MAIN) $(OBJS)
+			$(CC) $(LDFLAGS) $(CFLAGS) $(INCLUDES) -o $(MAIN) $(OBJS) -I$(TCLINC) -L$(TCLLIB) -ltclstub8.6
 
 # this is a suffix replacement rule for building .o's from .c's
 # it uses automatic variables $<: the name of the prerequisite of

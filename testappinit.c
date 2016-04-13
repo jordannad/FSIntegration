@@ -126,18 +126,13 @@ EXPORT(int,FS_Init)(Tcl_Interp *interp)
      When you add commands here make sure you add the public ones to the
      pftools.tcl with the namespace export command 
      ***********************************************************************/
- 
-   Tcl_CreateCommand(interp, "FactorSafety::getfactorsafety", (Tcl_CmdProc *)FactorSafetyCommand,
-                     (ClientData) data, (Tcl_CmdDeleteProc *) NULL);
-   
-#ifdef SGS
-   Tcl_CreateExitHandler((Tcl_ExitProc *)PFTExitProc, (ClientData) data);
-#endif
 
-   Tcl_SetVar(interp, "tcl_prompt1", "puts -nonewline {fstools> }",
-              TCL_GLOBAL_ONLY);
-
-   return Tcl_PkgProvide(interp, "FactorSafety", "1.0");
+   /* changed this to check for an error - GPS */
+     if (Tcl_PkgProvide(interp, "FactorSafety", "1.0") == TCL_ERROR) {
+         return TCL_ERROR;
+     }
+     Tcl_CreateObjCommand(interp, "hello", Hello_Cmd, NULL, NULL);
+     return TCL_OK;
 }
 
 
