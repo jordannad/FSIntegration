@@ -40,8 +40,6 @@
 #ifndef DATABOX_HEADER
 #define DATABOX_HEADER
 
-#include "parflow_config.h"
-
 #ifdef HAVE_HDF
 #include <hdf.h>
 #endif

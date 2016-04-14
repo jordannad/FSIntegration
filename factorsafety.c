@@ -22,6 +22,7 @@ void ComputeFactorSafety(
    Databox *slope_x,
    Databox *slope_y,
    Databox *pressure, 
+   Databox *saturation,
    Databox *factor_safety)
 {
    int             i,  j;
@@ -88,7 +89,8 @@ void ComputeFactorSafety(
                      double alpha_val = *(DataboxCoeff(alpha, i, j, k));
                      double n_val = *(DataboxCoeff(n, i, j, k));
                      double porosity_val = *(DataboxCoeff(porosity, i, j, k));
-                     chi = (porosity_val - theta_resid_val)/(theta_sat_val - theta_resid_val);
+		     double saturation_val = *(DataboxCoeff(saturation, i, j, k));
+                     chi = (saturation_val - theta_resid_val)/(theta_sat_val - theta_resid_val);
                   }
                   double depth = k_top - k;
                   fw = -(chi * press * uww * tan(fric_angle))/(uws*a1*b1*depth);

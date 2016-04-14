@@ -21,8 +21,11 @@
 #include <tcl.h>
 #include "databox.h"
 
-static char *COMPUTEFACTORSAFETY          = "Usage: computefactorsafety alpha n theta_resid theta_sat \n
-										cohesion porosity friction_angle top slope_x slope_y pressure\n";
+/*------------------------------------------------------------------------
+ * Error messages
+ *------------------------------------------------------------------------*/
+
+static char *GETFACTORSAFETY = "Usage: getfactorsafety alpha n theta_resid theta_sat cohesion porosity friction_angle top slope_x slope_y pressure saturation\n";
 
 /*-----------------------------------------------------------------------
  * function prototypes
@@ -45,7 +48,7 @@ char *GetValidFileExtension ANSI_PROTO((char *filename));
 
 void WrongNumArgsError ANSI_PROTO((Tcl_Interp *interp, char *usage));
 void SetNonExistantError ANSI_PROTO((Tcl_Interp *interp, char *hashkey)); 
-
+void ReadWriteError ANSI_PROTO((Tcl_Interp *interp));
 #undef ANSI_PROTO
 
 

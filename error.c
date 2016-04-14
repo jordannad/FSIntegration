@@ -149,3 +149,13 @@ void        SetNonExistantError(
    Tcl_AppendResult(interp, "\nError: `", hashkey, 
                             "' is not a valid set name\n", (char *) NULL);
 }
+
+/*-----------------------------------------------------------------------
+ * Assign an out of memory error to the tcl result
+ *-----------------------------------------------------------------------*/
+
+void	ReadWriteError(Tcl_Interp *interp) 
+{
+   Tcl_SetResult(interp, "\nError: The file could not be accessed or there is not enough memory available \n", TCL_STATIC);
+}
+

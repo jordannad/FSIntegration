@@ -37,7 +37,6 @@
  *
  *****************************************************************************/
 
-#include "factorsafety_config.h"   /* Have to figure this out!! */
 
 #include <string.h>
 #include <unistd.h>
@@ -48,6 +47,7 @@
 #endif
 
 #include "fstools.h"
+#include "factorsafety.h"
 #include <tcl.h>
 #include "grid.h"
 #include "error.h"
@@ -249,6 +249,7 @@ int            FactorSafetyCommand(
    Databox *slope_x;
    Databox *slope_y;
    Databox *pressure; 
+   Databox *saturation;
 
    char       *filename = "factor safety";
    char       *alpha_hashkey;
@@ -262,12 +263,13 @@ int            FactorSafetyCommand(
    char       *slope_x_hashkey;
    char       *slope_y_hashkey;
    char       *pressure_hashkey; 
+   char	      *saturation_hashkey;
 
    char        factor_safety_hashkey[MAX_KEY_SIZE];
 
    /* Check and see if there is at least one argument following  */
    /* the command.                                               */
-   if (argc <= 11)
+   if (argc <= 12)
    {
       WrongNumArgsError(interp, FACTORSAFETYUSAGE);
       return TCL_ERROR;
@@ -284,6 +286,7 @@ int            FactorSafetyCommand(
    slope_x_hashkey = argv[9];
    slope_y_hashkey = argv[10];
    pressure_hashkey = argv[11];
+   saturation_hashkey = argv[12];
 
 
    if ((top = DataMember(data, top_hashkey, entryPtr)) == NULL)
@@ -352,6 +355,12 @@ int            FactorSafetyCommand(
       return TCL_ERROR;
    }
 
+    if ((saturation = DataMember(data, saturation_hashkey, entryPtr)) == NULL)
+   {
+      SetNonExistantError(interp, saturation_hashkey);
+      return TCL_ERROR;
+   }
+
    {
       int nx = DataboxNx(pressure);
       int ny = DataboxNy(pressure);
@@ -378,7 +387,7 @@ int            FactorSafetyCommand(
     } 
 
     ComputeFactorSafety(alpha, n, theta_resid, theta_sat, cohesion, porosity, friction_angle,
-      top, slope_x, slope_y, pressure, factor_safety);
+      top, slope_x, slope_y, pressure, saturation, factor_safety);
       }
       else
       {

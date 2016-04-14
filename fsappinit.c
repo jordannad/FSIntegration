@@ -29,13 +29,11 @@
 /* 
  * fsappinit.c
  *
- * This file contains routines to add the Factor Safety commands to the Tcl
+ * This file contains routines to add the Factor Safety command (getfactorsafety) to the Tcl
  * interpreter as well as start the appropriate version(command line
  * or GUI and command line).
  *
  */
-
-#include "fs_config.h"
 
 #include <stdlib.h>
 
@@ -124,7 +122,7 @@ EXPORT(int,FS_Init)(Tcl_Interp *interp)
 
    /************************************************************************
      When you add commands here make sure you add the public ones to the
-     pftools.tcl with the namespace export command 
+     fstools.tcl with the namespace export command 
      ***********************************************************************/
  
    Tcl_CreateCommand(interp, "FactorSafety::getfactorsafety", (Tcl_CmdProc *)FactorSafetyCommand,
@@ -137,7 +135,7 @@ EXPORT(int,FS_Init)(Tcl_Interp *interp)
    Tcl_SetVar(interp, "tcl_prompt1", "puts -nonewline {fstools> }",
               TCL_GLOBAL_ONLY);
 
-   return Tcl_PkgProvide(interp, "FactorSafety", "1.0");
+   return Tcl_PkgProvide(interp, "factorsafety", "1.0");
 }
 
 

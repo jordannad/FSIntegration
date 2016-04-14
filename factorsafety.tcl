@@ -26,13 +26,14 @@
 #  USA
 #**********************************************************************EHEADER
 
-package provide FactorSafety 1.0
+package provide factorsafety 1.0
 
 namespace eval FactorSafety {
 
     variable IsArchUnix
 
     # Determine which Arch we are running on
+    # Variable name retained from Parflow but is backwards here.
     if { [ string compare $tcl_platform(platform) "windows" ] } {
 	set FactorSafety::IsArchUnix 1
 
@@ -56,7 +57,7 @@ namespace eval FactorSafety {
 
     variable FS_DIR [FactorSafety::FixupFilename $::env(FS_DIR)]
     
-
+    #Export names from the shared library (tcl command name)
     namespace export getfactorsafety
 }
 

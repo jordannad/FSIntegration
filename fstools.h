@@ -6,8 +6,6 @@
 #ifndef FSTOOLS_HEADER
 #define FSTOOLS_HEADER
 
-#include "parflow_config.h"  /* This has not been figured out yet!!!! */
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

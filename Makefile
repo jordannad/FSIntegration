@@ -19,7 +19,7 @@ INCLUDES =
 TCLINC=/usr/include/tcl8.6
 TCLLIB=/usr/lib/x86_64-linux-gnu
 
-#define the C header files
+#define the C header files (this is not used anywhere?)
 HDRS = databox.h error.h factorsafety.h file.h fstools.h general.h \
        grid.h load.h pfload_file.h readdatabox.h region.h tools_io.h usergrid.h
 
