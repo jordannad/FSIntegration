@@ -8,7 +8,7 @@ CC = gcc
 #compiler flags:
 # -g     adds debugging information to the executable file
 # -Wall  turns on most, but not all compiler warnings
-CFLAGS = -g -Wall -fno-common
+CFLAGS = -g -Wall 
 
 LDFLAGS = -fPIC -shared  # linking flags
 
@@ -33,13 +33,10 @@ SRCS = databox.c error.c file.c grid.c load.c readdatabox.c \
 OBJS = $(SRCS:.c=.o)
 
 #define the executable file
-MAIN = myfactorsafety.so
+MAIN = factorsafety.so
 
 all:	$(MAIN)
-	@echo Simple compiler named myfactorsafety has been compiled
-
-$(MAIN): $(OBJS)
-	$(CC) $(LDFLAGS) $(CFLAGS) $(INCLUDES) -o $(MAIN) $(OBJS) -I$(TCLINC) -L$(TCLLIB) -ltclstub8.6
+	@echo Simple compiler named factorsafety has been compiled
 
 # this is a suffix replacement rule for building .o's from .c's
 # it uses automatic variables $<: the name of the prerequisite of
@@ -47,6 +44,11 @@ $(MAIN): $(OBJS)
 # (see the gnu make manual section about automatic variables)
 .c.o:
 	$(CC) $(CFLAGS) $(LDFLAGS) $(INCLUDES) -c $<  -o $@
+
+
+$(MAIN): $(OBJS)
+	$(CC) $(LDFLAGS) $(CFLAGS) $(INCLUDES) -o $(MAIN) $(OBJS) -I$(TCLINC) -L$(TCLLIB) -ltclstub8.6
+
 
 clean:
 	$(RM) *.o *~ $(MAIN)

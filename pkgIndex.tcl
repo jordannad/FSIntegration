@@ -5,4 +5,4 @@
 
 package ifneeded factorsafety 1.0 [list \
 	[source [file join $dir factorsafety.tcl]] \
-		[load [file join $dir factorsafety[info sharedlibextension]]] ]
+	[load [file join $dir factorsafety[info sharedlibextension]]] ]

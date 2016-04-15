@@ -1,4 +1,4 @@
-#include "factor_safety.h"
+#include "factorsafety.h"
 
 /*-----------------------------------------------------------------------
  * ComputeFactorSafety:
@@ -25,15 +25,12 @@ void ComputeFactorSafety(
    Databox *saturation,
    Databox *factor_safety)
 {
-   int             i,  j;
+   int             i,  j,  k;
    int             nx, ny, nz;
    double          dx, dy, dz;
 
-   /* Pre-assignment of coefficients for 3d datasets */
-   double *cohesion_coeff            = DataboxCoeffs(cohesion);
-   double *porosity_coeff            = DataboxCoeffs(porosity);
-   double *pressure_coeff            = DataboxCoeffs(pressure);
-   double *factor_safety_coeff       = DataboxCoeffs(factor_safety);
+   int 		   k_top;
+   double 	   fs_inf; 
 
    nx = DataboxNx(pressure);
    ny = DataboxNy(pressure);
@@ -44,12 +41,15 @@ void ComputeFactorSafety(
    dz = DataboxDz(pressure);
 
    /* Calculate factor of safety for the top 10 m of the domain */
-   int fs_nz = round(10.0/dz,0);
-   double fs_inf = 10.0;
+   int fs_nz =round(10.0/dz);
+   fs_inf = 10.0;
 
    /* Components of factor of safety calculation */
-   double         ff, fw, fc; 
-
+   double uww = 9801.0;
+   
+   double	  a1, b1, slope, chi, uws, depth;
+   double         ff, fw, fc, fs_min, z_fsmin, p_min; 
+   double 	  theta_sat_val, theta_resid_val, alpha_val, n_val, saturation_val, fric_angle, press, factor_safety_val, porosity_val;
    for (j = 0; j < ny; j++)
    {
       for (i = 0; i < nx; i++)
@@ -58,41 +58,42 @@ void ComputeFactorSafety(
          /* 
           * Calculate the overall slope for a single cell at the top of the domain.
          */
-         double slope = (sqrt(pow(*DataboxCoeff(slope_x, i, j, 0),2.0)) + sqrt(pow(*DataboxCoeff(slope_y,i,j,0),2.0)));
-         double a1 = sin(slope)
-         double b1 = cos(slope)
+         slope = (sqrt(pow(*DataboxCoeff(slope_x, i, j, 0),2.0)) + sqrt(pow(*DataboxCoeff(slope_y,i,j,0),2.0)));
+         a1 = sin(slope);
+         b1 = cos(slope);
 
          /* Calculate top vertical element */
-         int k_top = *(DataboxCoeff(top, i, j, 0));
+         k_top = *(DataboxCoeff(top, i, j, 0));
          /* If k is non-negative then we can proceed */
-	      if ( k_top > 0 ) {
+	      /*if (k_top > 0 ) { */
 
             /* Loop over the top soil layer for which factor of safety calculations are to be performed */
-            double fs_min = fs_inf;
-            double z_fsmin = k_top;
-            double p_min = k_top;
-            for (int k = k_top; k > (k_top - fs_nx); k--)
+            fs_min = fs_inf;
+            z_fsmin = k_top;
+            p_min = k_top;
+            for (k = k_top; k > (k_top - fs_nz); k--) {
                /* Check if slope is too flat */
                if (fabs(slope) < 1.0e-5) {
                   ff = fs_inf;
                } else {
-                  double fric_angle = *(DataboxCoeff(friction_angle, i, j, k));
+                  fric_angle = *(DataboxCoeff(friction_angle, i, j, k));
                   ff = slope/fric_angle;
                }
                if ((abs(a1) > 1.0e-5) && (k != k_top)) {
                   /* Initialize Bishop's fs correction for saturated conditions */
-                  double chi = 1.0;
-                  double press = *(DataboxCoeff(pressure, i, j, k));
+                  chi = 1.0;
+                  press = *(DataboxCoeff(pressure, i, j, k));
                   if (press < 0.) {
-                     double theta_sat_val = *(DataboxCoeff(theta_sat, i, j, k));
-                     double theta_resid_val = *(DataboxCoeff(theta_resid, i, j, k));
-                     double alpha_val = *(DataboxCoeff(alpha, i, j, k));
-                     double n_val = *(DataboxCoeff(n, i, j, k));
-                     double porosity_val = *(DataboxCoeff(porosity, i, j, k));
-		     double saturation_val = *(DataboxCoeff(saturation, i, j, k));
+  		     porosity_val = *(DataboxCoeff(porosity, i, j, k));
+		     uws = 18000.0;
+                     theta_sat_val = *(DataboxCoeff(theta_sat, i, j, k));
+                     theta_resid_val = *(DataboxCoeff(theta_resid, i, j, k));
+                     alpha_val = *(DataboxCoeff(alpha, i, j, k));
+                     n_val = *(DataboxCoeff(n, i, j, k));
+		     saturation_val = *(DataboxCoeff(saturation, i, j, k));
                      chi = (saturation_val - theta_resid_val)/(theta_sat_val - theta_resid_val);
                   }
-                  double depth = k_top - k;
+                  depth = k_top - k;
                   fw = -(chi * press * uww * tan(fric_angle))/(uws*a1*b1*depth);
                   fc = (*(DataboxCoeff(cohesion, i, j, k)))/(uws*depth*a1*b1);
                } else {
@@ -115,15 +116,8 @@ void ComputeFactorSafety(
                }
          
 
-         if (*(DataboxCoeff()))
-	     *(DataboxCoeff(factor_safety, i, j, 0)) = 0.0;
-	   } else if( k <  nz) {
-	    if(*(DataboxCoeff(pressure, i, j, k)) > 0 ) {
-	       *(DataboxCoeff(surface_storage, i, j, 0)) =  *(DataboxCoeff(pressure, i, j, k)) * dx * dy;
-	    }
-	 } else {
-	    printf("Error: Index in top (k=%d) is outside of domain (nz=%d)\n", k, nz);
-	 }
+           *(DataboxCoeff(factor_safety, i, j, k)) = factor_safety_val;
+	   } 
       }
    }
 }

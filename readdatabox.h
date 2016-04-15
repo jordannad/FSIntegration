@@ -40,8 +40,6 @@
 #ifndef READDATABOX_HEADER
 #define READDATABOX_HEADER
 
-#include "parflow_config.h"
-
 #include <stdio.h>
 
 #ifdef HAVE_HDF4

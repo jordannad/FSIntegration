@@ -25,7 +25,7 @@
  * Error messages
  *------------------------------------------------------------------------*/
 
-static char *GETFACTORSAFETY = "Usage: getfactorsafety alpha n theta_resid theta_sat cohesion porosity friction_angle top slope_x slope_y pressure saturation\n";
+static char *FACTORSAFETYUSAGE = "Usage: getfactorsafety alpha n theta_resid theta_sat cohesion porosity friction_angle top slope_x slope_y pressure saturation\n";
 
 /*-----------------------------------------------------------------------
  * function prototypes

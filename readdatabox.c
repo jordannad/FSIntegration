@@ -37,8 +37,6 @@
  *
  *****************************************************************************/
 
-#include "parflow_config.h"
-
 #include "readdatabox.h"
 #include "tools_io.h"
 

@@ -62,7 +62,9 @@ typedef struct
 
 
 /* fstools.c */
-
+double GetDouble P((Tcl_Interp *interp, char *key));
+int GetInt P((Tcl_Interp *interp, char *key));
+int GetIntDefault P((Tcl_Interp *interp, char *key, int def));
 Data *InitFSToolsData P((void ));
 int AddData P((Data *data , Databox *databox , char *label , char *hashkey ));
 void FSTExitProc P((ClientData clientData ));

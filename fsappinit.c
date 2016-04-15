@@ -42,6 +42,7 @@
 #endif
 
 #include "factorsafety.h"
+#include "fstools.h"
 
 #if defined(__WIN32__)
 #define WIN32_LEAN_AND_MEAN
@@ -107,7 +108,7 @@ DllEntryPoint(hInst, reason, reserved)
 /*                TCL_ERROR if the FSTools data structures cannot be      */
 /*                allocated memory.                                       */
 
-EXPORT(int,FS_Init)(Tcl_Interp *interp)
+EXPORT(int,Factorsafety_Init)(Tcl_Interp *interp)
 {
   if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL) {
     return TCL_ERROR;

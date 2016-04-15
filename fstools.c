@@ -54,6 +54,108 @@
 #include "general.h"
 
 
+/**
+Get an input string from the input database.  If the key is not
+found print an error and exit.
+
+There is no checking on what the string contains, anything other than
+NUL is allowed. 
+
+@memo Get a string from the input database
+@param interp TCL interpreter with the database
+@param key The key to search for
+@return The string which matches the search key
+*/
+int GetInt(Tcl_Interp *interp, char *key)
+{
+   Tcl_Obj *array_name;
+   Tcl_Obj *key_name;
+   Tcl_Obj *value;
+
+   int ret;
+
+   array_name = Tcl_NewStringObj("Parflow::PFDB", 13);
+   key_name = Tcl_NewStringObj(key, strlen(key));
+
+   if ( (value = Tcl_ObjGetVar2(interp, array_name, key_name, 0)) )
+   {
+      Tcl_GetIntFromObj(interp, value, &ret);
+      return ret;
+   }
+   else
+   {
+      return -99999999;
+   }
+}
+
+/**
+Get an input string from the input database.  If the key is not
+found print an error and exit.
+
+There is no checking on what the string contains, anything other than
+NUL is allowed. 
+
+@memo Get a string from the input database
+@param interp TCL interpreter with the database
+@param key The key to search for
+@return The string which matches the search key
+*/
+int GetIntDefault(Tcl_Interp *interp, char *key, int def)
+{
+   Tcl_Obj *array_name;
+   Tcl_Obj *key_name;
+   Tcl_Obj *value;
+
+   int ret;
+
+   array_name = Tcl_NewStringObj("Parflow::PFDB", 13);
+   key_name = Tcl_NewStringObj(key, strlen(key));
+
+   if ( (value = Tcl_ObjGetVar2(interp, array_name, key_name, 0)) )
+   {
+      Tcl_GetIntFromObj(interp, value, &ret);
+      return ret;
+   }
+   else
+   {
+      return def;
+   }
+}
+
+/**
+Get an input string from the input database.  If the key is not
+found print an error and exit.
+
+There is no checking on what the string contains, anything other than
+NUL is allowed. 
+
+@memo Get a string from the input database
+@param interp TCL interpreter with the database
+@param key The key to search for
+@return The string which matches the search key
+*/
+double GetDouble(Tcl_Interp *interp, char *key)
+{
+   Tcl_Obj *array_name;
+   Tcl_Obj *key_name;
+   Tcl_Obj *value;
+
+   double ret;
+
+   array_name = Tcl_NewStringObj("Parflow::PFDB", 13);
+   key_name = Tcl_NewStringObj(key, strlen(key));
+
+   if ( (value = Tcl_ObjGetVar2(interp, array_name, key_name, 0)) )
+   {
+      Tcl_GetDoubleFromObj(interp, value, &ret);
+      return ret;
+   }
+   else
+   {
+      return -99999999;
+   }
+}
+
 Data    *InitFSToolsData()
 {
    Data *new_data;  /* Data structure used to hold data set hash table */
@@ -226,7 +328,7 @@ void               PFTExitProc(
  * Description: Compute the factor of safety
  * 
  * Cmd. syntax: computefactorsafety alpha, n, theta_resid, theta_sat, cohesion, 
-                porosity, friction_angle, top, slope_x, slope_y, pressure
+                porosity, friction_angle, top, slope_x, slope_y, pressure saturation
 
  *-----------------------------------------------------------------------*/
 int            FactorSafetyCommand(
@@ -238,6 +340,8 @@ int            FactorSafetyCommand(
    Tcl_HashEntry *entryPtr;  /* Points to new hash table entry         */
    Data       *data = (Data *)clientData;
 
+   /* Type declarations for variables passed into computefactorsafety function 
+    * in factorsafety.c */
    Databox *alpha;
    Databox *n;
    Databox *theta_resid;
@@ -251,7 +355,11 @@ int            FactorSafetyCommand(
    Databox *pressure; 
    Databox *saturation;
 
+   Databox *factor_safety;
+
+   /* Hashkeys to databox variables (used by tcl interp?) */
    char       *filename = "factor safety";
+
    char       *alpha_hashkey;
    char       *n_hashkey;
    char       *theta_resid_hashkey;
@@ -264,11 +372,10 @@ int            FactorSafetyCommand(
    char       *slope_y_hashkey;
    char       *pressure_hashkey; 
    char	      *saturation_hashkey;
-
    char        factor_safety_hashkey[MAX_KEY_SIZE];
 
-   /* Check and see if there is at least one argument following  */
-   /* the command.                                               */
+   /* Check and see if there are enough arguments following  */
+   /* the command.                                           */
    if (argc <= 12)
    {
       WrongNumArgsError(interp, FACTORSAFETYUSAGE);
