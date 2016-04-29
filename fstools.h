@@ -68,6 +68,7 @@ int GetIntDefault P((Tcl_Interp *interp, char *key, int def));
 Data *InitFSToolsData P((void ));
 int AddData P((Data *data , Databox *databox , char *label , char *hashkey ));
 void FSTExitProc P((ClientData clientData ));
+int LoadFSPFCommand P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
 
 int FactorSafetyCommand P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
 int FactorSafetyCommandold P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));

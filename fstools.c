@@ -46,6 +46,7 @@
 #define strdup _strdup
 #endif
 
+#include "readdatabox.h"
 #include "fstools.h"
 #include "factorsafety.h"
 #include <tcl.h>
@@ -326,6 +327,137 @@ void               PFTExitProc(
 }
 
 
+/*-----------------------------------------------------------------------
+ * routine for `pfload' command
+ * Description: One or more arguments are required.  If the first
+ *              argument is an option, then it tells what the format of
+ *              the following filename is.  If no option is given, then
+ *              the filename extension is used to determine the type of
+ *              the file.
+ * Cmd. syntax: pfload [-option] filename [default_value]
+ *-----------------------------------------------------------------------*/
+
+int            LoadFSPFCommand(
+   ClientData     clientData,
+   Tcl_Interp    *interp,
+   int            argc,
+   char          *argv[])
+{
+   Data       *data = (Data *)clientData;
+
+   Databox    *databox;
+
+   char       *filetype, *filename;
+   char        newhashkey[MAX_KEY_SIZE];
+
+   double     default_value = 0.0;
+
+
+   /* Check and see if there is at least one argument following  */
+   /* the command.                                               */
+
+   if (argc == 1)
+   {
+      WrongNumArgsError(interp, LOADPFUSAGE);
+      return TCL_ERROR;
+   }
+
+   /* Options are preceeded by a dash.  Check to make sure the */
+   /* option is valid.                                         */
+
+   if (*argv[1] == '-') 
+   {
+      /* Skip past the '-' before the file type option */
+      filetype = argv[1] + 1;
+
+      if (!IsValidFileType(filetype))
+      {
+         InvalidOptionError(interp, 1, LOADPFUSAGE);
+         return TCL_ERROR;
+      }
+
+      /* Make sure a filename follows the option */
+      // if (argc == 2 || argc == 3)
+      if (argc == 2)
+      {
+         MissingFilenameError(interp, 1, LOADPFUSAGE);
+         return TCL_ERROR;
+      }
+      else
+        filename = argv[2];
+
+      if(argc == 4) {
+	 if (Tcl_GetDouble(interp, argv[3], &default_value) == TCL_ERROR)
+	 {
+	    NotADoubleError(interp, 1, LOADPFUSAGE);
+	    return TCL_ERROR;
+	 }
+      }
+	 
+   }
+   else
+   {
+      /* If no option is given, then check the extension of the   */
+      /* filename.  If the extension on the filename is invalid,  */
+      /* then give an error.                                      */
+
+      filename = argv[1];
+
+      /* Make sure the file extension is valid */
+
+      if ((filetype = GetValidFileExtension(filename)) == (char *)NULL)
+      {
+         InvalidFileExtensionError(interp, 1, LOADPFUSAGE);
+         return TCL_ERROR;
+      }
+
+      if(argc == 3) {
+	 if (Tcl_GetDouble(interp, argv[2], &default_value) == TCL_ERROR)
+	 {
+	    NotADoubleError(interp, 1, LOADPFUSAGE);
+	    return TCL_ERROR;
+	 }
+      }
+   }
+
+   if (strcmp (filetype, "pfb") == 0)
+      databox = ReadParflowB(filename, default_value);
+   else if (strcmp(filetype, "pfsb") == 0)
+      databox = ReadParflowSB(filename, default_value);
+   else if (strcmp(filetype, "sa") == 0)
+      databox = ReadSimpleA(filename, default_value);
+   else if (strcmp(filetype, "sb") == 0)
+      databox = ReadSimpleB(filename, default_value);
+   else if (strcmp(filetype, "fld") == 0)
+      databox = ReadAVSField(filename, default_value);
+   else if (strcmp(filetype, "silo") == 0)
+      databox = ReadSilo(filename, default_value);
+   else
+      databox = ReadRealSA(filename, default_value);
+
+   /* Make sure the memory for the data was allocated */
+
+   if (databox)
+   {
+      /* Make sure the data set pointer was added to */
+      /* the hash table successfully.                */
+
+      if (!AddData(data, databox, filename, newhashkey))
+         FreeDatabox(databox); 
+      else
+      {
+         Tcl_AppendElement(interp, newhashkey); 
+      } 
+   }
+   else
+   {
+      ReadWriteError(interp);
+      return TCL_ERROR;
+   }
+
+   return TCL_OK;
+
+}
    
 /*-----------------------------------------------------------------------
  * routine for `computefactorsafety' command
@@ -343,6 +475,14 @@ int            FactorSafetyCommand(
 {
 
    Data *data = (Data *)clientData;
+   Tcl_CmdInfo cmdInfo;
+   if (Tcl_GetCommandInfo(interp, "Parflow::pfload", &cmdInfo) == 1) {
+      data = cmdInfo.clientData;
+      printf("In CmdInfo in fstools factorsafetycommand func... data is: %p\n", data);
+   } else {
+      printf("ERROR HERE?!?!?!?!\n");
+      return TCL_ERROR;
+   }
    Tcl_HashEntry *entryPtr;  /* Points to new hash table entry         */
    
 

@@ -60,5 +60,6 @@ namespace eval FactorSafety {
     #Export names from the shared library (tcl command name)
     namespace export getfactorsafety
     namespace export getfstop
+    namespace export fspfload
 }
 

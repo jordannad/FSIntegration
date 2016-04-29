@@ -132,6 +132,8 @@ EXPORT(int,Factorsafety_Init)(Tcl_Interp *interp)
                      (ClientData) data, (Tcl_CmdDeleteProc *) NULL);
    Tcl_CreateCommand(interp, "FactorSafety::getfstop", (Tcl_CmdProc *)FSExtractTopCommand,
                      (ClientData) data, (Tcl_CmdDeleteProc *) NULL);
+   Tcl_CreateCommand(interp, "FactorSafety::fspfload", (Tcl_CmdProc *)LoadFSPFCommand,
+                     (ClientData) data, (Tcl_CmdDeleteProc *) NULL);
    
 #ifdef SGS
    Tcl_CreateExitHandler((Tcl_ExitProc *)PFTExitProc, (ClientData) data);
