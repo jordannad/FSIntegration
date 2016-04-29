@@ -13,116 +13,6 @@
 #include <math.h>
 
 
-void ComputeFactorSafetyold(
-   Databox *alpha, Databox *n, Databox *theta_resid, Databox *theta_sat,
-   Databox *cohesion,
-   Databox *porosity,
-   Databox *friction_angle,
-   Databox *top,
-   Databox *slope_x,
-   Databox *slope_y,
-   Databox *pressure, 
-   Databox *saturation,
-   Databox *factor_safety)
-{
-   int             i,  j,  k;
-   int             nx, ny, nz;
-   double          dx, dy, dz;
-
-   int 		   k_top;
-   double 	   fs_inf; 
-
-   nx = DataboxNx(pressure);
-   ny = DataboxNy(pressure);
-   nz = DataboxNz(pressure);
-
-   dx = DataboxDx(pressure);
-   dy = DataboxDy(pressure);
-   dz = DataboxDz(pressure);
-
-   /* Calculate factor of safety for the top 10 m of the domain */
-   int fs_nz =round(10.0/dz);
-   fs_inf = 10.0;
-
-   /* Components of factor of safety calculation */
-   double uww = 9801.0;
-   
-   double	  a1, b1, slope, chi, uws, depth;
-   double         ff, fw, fc, fs_min, z_fsmin, p_min; 
-   double 	  theta_sat_val, theta_resid_val, alpha_val, n_val, saturation_val, fric_angle, press, factor_safety_val, porosity_val, uws_val;
-   for (j = 0; j < ny; j++)
-   {
-      for (i = 0; i < nx; i++)
-      {
-	 
-         /* 
-          * Calculate the overall slope for a single cell at the top of the domain.
-         */
-         slope = (sqrt(pow(*DataboxCoeff(slope_x, i, j, 0),2.0)) + sqrt(pow(*DataboxCoeff(slope_y,i,j,0),2.0)));
-         a1 = sin(slope);
-         b1 = cos(slope);
-
-         /* Calculate top vertical element */
-         k_top = *(DataboxCoeff(top, i, j, 0));
-         /* If k is non-negative then we can proceed */
-	      /*if (k_top > 0 ) { */
-
-            /* Loop over the top soil layer for which factor of safety calculations are to be performed */
-            fs_min = fs_inf;
-            z_fsmin = k_top;
-            p_min = k_top;
-            for (k = k_top; k > (k_top - fs_nz); k--) {
-               /* Check if slope is too flat */
-               if (fabs(slope) < 1.0e-5) {
-                  ff = fs_inf;
-               } else {
-                  fric_angle = *(DataboxCoeff(friction_angle, i, j, k));
-                  ff = slope/fric_angle;
-               }
-               if ((abs(a1) > 1.0e-5) && (k != k_top)) {
-                  /* Initialize Bishop's fs correction for saturated conditions */
-                  chi = 1.0;
-                  press = *(DataboxCoeff(pressure, i, j, k));
-                  if (press < 0.) {
-  		     porosity_val = *(DataboxCoeff(porosity, i, j, k));
-		     uws = 18000.0;
-                     theta_sat_val = *(DataboxCoeff(theta_sat, i, j, k));
-                     theta_resid_val = *(DataboxCoeff(theta_resid, i, j, k));
-                     alpha_val = *(DataboxCoeff(alpha, i, j, k));
-                     n_val = *(DataboxCoeff(n, i, j, k));
-		     saturation_val = *(DataboxCoeff(saturation, i, j, k));
-                     chi = (saturation_val - theta_resid_val)/(theta_sat_val - theta_resid_val);
-                  }
-                  depth = k_top - k;
-                  fw = -(chi * press * uww * tan(fric_angle))/(uws*a1*b1*depth);
-                  fc = (*(DataboxCoeff(cohesion, i, j, k)))/(uws*depth*a1*b1);
-               } else {
-                  fw = 0.0;
-                  fc = 0.0;
-               }
-               factor_safety_val = ff + fw + fc;
-
-               /* Frictional strength cannot be less than zero */
-               if ((ff + fw) < 0.) {
-                   factor_safety_val = fc;
-               }
-               if (factor_safety_val > fs_inf) {
-                  factor_safety_val = fs_inf;
-               }
-               if (factor_safety_val < fs_min) {
-                  fs_min = factor_safety_val;
-                  z_fsmin = k;
-                  p_min = press;
-               }
-         
-
-           *(DataboxCoeff(factor_safety, i, j, k)) = factor_safety_val;
-	   } 
-      }
-   }
-} 
-
-
 void ComputeFactorSafety(Databox *alpha, Databox *n, Databox *theta_resid, Databox *theta_sat,
    Databox *cohesion,
    Databox *porosity,
@@ -150,85 +40,119 @@ void ComputeFactorSafety(Databox *alpha, Databox *n, Databox *theta_resid, Datab
    dx = DataboxDx(pressure);
    dy = DataboxDy(pressure);
    dz = DataboxDz(pressure);
-
+   /*printf("Got here check dx = %f, dy = %f, dz = %f\n", dx, dy, dz); */
    /* Calculate factor of safety at the failure surface of the domain */
    int fs_nz =round(failureDepth/dz);
+   /*printf("Got here check fs_nz = %d\n", fs_nz); */
    fs_inf = 10.0;
 
    /* Components of factor of safety calculation */
-      
    double	  a1, b1, slope, chi, uws, uws_val, uwssum, depth, uws_depth, gs;
    double         suctionstress, ff, fw, fc, fs_min, z_fsmin, p_min; 
-   double 	  theta_sat_val, theta_resid_val, alpha_val, n_val, saturation_val, fric_angle, press, factor_safety_val, porosity_val;
+   double 	  theta_sat_val, theta_resid_val, alpha_val, n_val, saturation_val, fric_angle, press, factor_safety_val, porosity_val, cohesion_val;
    double uww = 9801;
+   double slopeoverall;
+   double dg2rad = 3.14159265/180; /*Convert an angle in degrees to radians */
 
    /* Loop over all surface cells (first i (x) then j (y) direction) */
    for (j = 0; j < ny; j++)
    {
       for (i = 0; i < nx; i++)
       {
-	  
+         	  
          /* 
           * Calculate the overall slope for a single cell at the top of the domain.
          */
-         slope = (sqrt(pow(*DataboxCoeff(slope_x, i, j, 0),2.0)) + sqrt(pow(*DataboxCoeff(slope_y,i,j,0),2.0)));
-         a1 = sin(slope);
-         b1 = cos(slope);
-	 uwssum = 0;
+         slopeoverall = sqrt(pow(*DataboxCoeff(slope_x, i, j, 0),2.0) + 
+			pow(*DataboxCoeff(slope_y,i,j,0),2.0));
+         slope = (atan(slopeoverall))*(180.0/3.14159265); /*Slope in degrees */
+         /*printf("Printing slopes, i = %d, j = %d, slope (degrees) = %f\n", i, j, slope);*/
+         a1 = sin(slope*dg2rad); /*Calculate sin of angle in radians */
+         b1 = cos(slope*dg2rad); 
+         /*printf("Printing slopes, i = %d, j = %d, a = %f, b = %f\n", i, j, a1, b1);*/
+
+
+	 
          /* Calculate top vertical element */
          k_top = *(DataboxCoeff(top, i, j, 0));
+         /*printf("Printing top element number for i = %d, j = %d, Ans = %d \n", i, j, k_top);*/
          /* If k is non-negative then we can proceed */
 	 /* For now, all of the examples will guarantee horizontal x-y cells */
-	      /*if (k_top > 0 ) { */
+	     
 
-          /* Initialize result variables */
-          fs_min = fs_inf;
-          z_fsmin = 1.0e25;
-          p_min = 100.0;
-          uwssum = 0.0;
-  	  /* Loop over the top soil layers for which FOS calcs are to be performed */
-          for (k = k_top; k > (k_top - fs_nz); k--) {
-	     depth = k_top - k;
-	     porosity_val = *(DataboxCoeff(porosity, i, j, k));
-	     saturation_val = *(DataboxCoeff(saturation, i, j, k));
-	     uws_val = *(DataboxCoeff(uws_sat, i, j, k));
-             gs = (uws_val/uww - porosity_val)/(1 - porosity_val);
-	     press = *(DataboxCoeff(pressure, i, j, k));
-	     theta_sat_val = *(DataboxCoeff(theta_sat, i, j, k));
-             theta_resid_val = *(DataboxCoeff(theta_resid, i, j, k));
-             alpha_val = *(DataboxCoeff(alpha, i, j, k));
-             n_val = *(DataboxCoeff(n, i, j, k));
+         /* Initialize result variables */
+         uwssum = 0;
+         fs_min = fs_inf;
+         z_fsmin = 1.0e25;
+         p_min = 100.0;
+         uwssum = 0.0;
+  	 double moisture_content;
+         
+         if ((i == 1) && (j == 1)) {
+               printf("Printing at i = 1, j = 1, top = %d\n", k_top);
+         }
+         /* Loop over the top soil layers for which FOS calcs are to be performed */
+         for (k = k_top; k >= (k_top - fs_nz); k--) {
+	    depth = (k_top - k)*dz; /*Depth below the surface */
+            
+            /* Testing depth- confirms looping from surface to 3.0m below everywhere*/
+
+            if ((i == 1) && (j == 1)) {
+               printf("Printing depth at i = 1, j = 1, Depth = %f\n", depth);
+            }
+            /*Get values from input datasets */
+	    porosity_val = *(DataboxCoeff(porosity, i, j, k));
+	    saturation_val = *(DataboxCoeff(saturation, i, j, k));
+            moisture_content = porosity_val*saturation_val;
+            press = *(DataboxCoeff(pressure, i, j, k));
+	    theta_sat_val = *(DataboxCoeff(theta_sat, i, j, k));
+            theta_resid_val = *(DataboxCoeff(theta_resid, i, j, k));
+	    uws_val = *(DataboxCoeff(uws_sat, i, j, k));
+            cohesion_val = *(DataboxCoeff(cohesion, i, j, k));
+
+            /* Component to assist calculation of depth averaged unit weight */
+            gs = (uws_val/uww - porosity_val)/(1 - porosity_val);
+	    
+
+            /* These two values are currently unused */
+            alpha_val = *(DataboxCoeff(alpha, i, j, k));
+            n_val = *(DataboxCoeff(n, i, j, k));
            
 	     /* Calculate unit weight of the soil for partially saturated conditions */
 	     if (press < 0.) {
-		uws = (gs*(1- porosity_val) + saturation_val)*uww;
+		uws = (gs*(1- porosity_val) + moisture_content)*uww;
  	     } else {
                 uws = uws_val;
              }
              uwssum = uwssum + uws;
-	     uws_depth = uwssum/depth;
+	     uws_depth = uwssum/(depth/dz);
 
              /* Check if slope is too flat */
              if (fabs(slope) < 1.0e-5) {
                 ff = fs_inf;
              } else {
                 fric_angle = *(DataboxCoeff(friction_angle, i, j, k));
-                ff = slope/fric_angle;
+                ff = tan(fric_angle*dg2rad)/tan(slope*dg2rad);
              }
+
+	     /* Consistent with TRIGRS implementation */
              if ((abs(a1) > 1.0e-5) && (k != k_top)) {
 
                 /* Initialize Bishop's fs correction for saturated conditions */
                 chi = 1.0;
-		
+		/* Adjust chi if we have unsaturated conditions */
                 if (press < 0.) {
-                  chi = (saturation_val - theta_resid_val)/(theta_sat_val - theta_resid_val);
+                  chi = (moisture_content - theta_resid_val)/(porosity_val - theta_resid_val);
                   suctionstress = (-1*press)/(pow((1 + pow((alpha_val*press),n_val)),((n_val-1)/n_val)));
                 } else {
                   chi = 1.0;
                   suctionstress = -1*press;
-                }  
-                fw = -(chi * press * uww * tan(fric_angle))/(uws_depth*a1*b1*depth);
-                fc = (*(DataboxCoeff(cohesion, i, j, k)))/(uws_depth*depth*a1*b1);
+                } 
+
+                /* Compute the other factor of safety components */ 
+                fw = -(chi * press * uww * tan(fric_angle*dg2rad))/(uws_depth*a1*b1*depth);
+                fc = cohesion_val/(uws_depth*depth*a1*b1);
+
               } else {
                 fw = 0.0;
                 fc = 0.0;
@@ -238,6 +162,7 @@ void ComputeFactorSafety(Databox *alpha, Databox *n, Databox *theta_resid, Datab
                /* Frictional strength cannot be less than zero */
               if ((ff + fw) < 0.) {
                   factor_safety_val = fc;
+                  printf("Got here (ff + fw) < 0. on i = %d, j = %d\n", i, j);
               }
               if (factor_safety_val > fs_inf) {
                  factor_safety_val = fs_inf;

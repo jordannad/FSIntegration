@@ -47,6 +47,7 @@
 #endif
 
 #include "readdatabox.h"
+#include "printdatabox.h"
 #include "fstools.h"
 #include "factorsafety.h"
 #include <tcl.h>
@@ -688,188 +689,6 @@ int            FactorSafetyCommand(
    return TCL_OK;
 }
 
-/*-----------------------------------------------------------------------
- * routine for `computefactorsafety' command
- * Description: Compute the factor of safety
- * 
- * Cmd. syntax: computefactorsafety alpha, n, theta_resid, theta_sat, cohesion, 
-                porosity, friction_angle, top, slope_x, slope_y, pressure saturation
-
- *-----------------------------------------------------------------------*/
-int            FactorSafetyCommandold(
-   ClientData     clientData,
-   Tcl_Interp    *interp,
-   int            argc,
-   char          *argv[])
-{
-   Tcl_HashEntry *entryPtr;  /* Points to new hash table entry         */
-   Data       *data = (Data *)clientData;
-
-   /* Type declarations for variables passed into computefactorsafety function 
-    * in factorsafety.c */
-   Databox *alpha;
-   Databox *n;
-   Databox *theta_resid;
-   Databox *theta_sat;
-   Databox *cohesion;
-   Databox *porosity;
-   Databox *friction_angle;
-   Databox *top;
-   Databox *slope_x;
-   Databox *slope_y;
-   Databox *pressure; 
-   Databox *saturation;
-
-   Databox *factor_safety;
-
-   /* Hashkeys to databox variables (used by tcl interp?) */
-   char       *filename = "factor safety";
-
-   char       *alpha_hashkey;
-   char       *n_hashkey;
-   char       *theta_resid_hashkey;
-   char       *theta_sat_hashkey;
-   char       *cohesion_hashkey;
-   char       *porosity_hashkey;
-   char       *friction_angle_hashkey;
-   char       *top_hashkey;
-   char       *slope_x_hashkey;
-   char       *slope_y_hashkey;
-   char       *pressure_hashkey; 
-   char	      *saturation_hashkey;
-   char        factor_safety_hashkey[MAX_KEY_SIZE];
-
-   /* Check and see if there are enough arguments following  */
-   /* the command.                                           */
-   if (argc <= 12)
-   {
-      WrongNumArgsError(interp, FACTORSAFETYUSAGE);
-      return TCL_ERROR;
-   }
-
-   alpha_hashkey = argv[1];
-   n_hashkey = argv[2];
-   theta_resid_hashkey = argv[3];
-   theta_sat_hashkey = argv[4];
-   cohesion_hashkey = argv[5];
-   porosity_hashkey = argv[6];
-   friction_angle_hashkey = argv[7];
-   top_hashkey = argv[8];
-   slope_x_hashkey = argv[9];
-   slope_y_hashkey = argv[10];
-   pressure_hashkey = argv[11];
-   saturation_hashkey = argv[12];
-
-
-   if ((top = DataMember(data, top_hashkey, entryPtr)) == NULL)
-   {
-      SetNonExistantError(interp, top_hashkey);
-      return TCL_ERROR;
-   }
-
-    if ((alpha = DataMember(data, alpha_hashkey, entryPtr)) == NULL)
-   {
-      SetNonExistantError(interp, alpha_hashkey);
-      return TCL_ERROR;
-   }
-
-    if ((n = DataMember(data, n_hashkey, entryPtr)) == NULL)
-   {
-      SetNonExistantError(interp, n_hashkey);
-      return TCL_ERROR;
-   }
-
-    if ((theta_resid = DataMember(data, theta_resid_hashkey, entryPtr)) == NULL)
-   {
-      SetNonExistantError(interp, theta_resid_hashkey);
-      return TCL_ERROR;
-   }
-
-   if ((theta_sat = DataMember(data, theta_sat_hashkey, entryPtr)) == NULL)
-   {
-      SetNonExistantError(interp, theta_sat_hashkey);
-      return TCL_ERROR;
-   }
-
-   if ((cohesion = DataMember(data, cohesion_hashkey, entryPtr)) == NULL)
-   {
-      SetNonExistantError(interp, cohesion_hashkey);
-      return TCL_ERROR;
-   }
-
-   if ((friction_angle = DataMember(data, friction_angle_hashkey, entryPtr)) == NULL)
-   {
-      SetNonExistantError(interp, friction_angle_hashkey);
-      return TCL_ERROR;
-   }
-
-   if ((porosity = DataMember(data, porosity_hashkey, entryPtr)) == NULL)
-   {
-      SetNonExistantError(interp, porosity_hashkey);
-      return TCL_ERROR;
-   }
-
-   if ((slope_x = DataMember(data, slope_x_hashkey, entryPtr)) == NULL)
-   {
-      SetNonExistantError(interp, slope_x_hashkey);
-      return TCL_ERROR;
-   }
-
-   if ((slope_y = DataMember(data, slope_y_hashkey, entryPtr)) == NULL)
-   {
-      SetNonExistantError(interp, slope_y_hashkey);
-      return TCL_ERROR;
-   }
-
-   if ((pressure = DataMember(data, pressure_hashkey, entryPtr)) == NULL)
-   {
-      SetNonExistantError(interp, pressure_hashkey);
-      return TCL_ERROR;
-   }
-
-    if ((saturation = DataMember(data, saturation_hashkey, entryPtr)) == NULL)
-   {
-      SetNonExistantError(interp, saturation_hashkey);
-      return TCL_ERROR;
-   }
-
-   {
-      int nx = DataboxNx(pressure);
-      int ny = DataboxNy(pressure);
-      int nz = DataboxNz(pressure);
-
-      double x = DataboxX(pressure);
-      double y = DataboxY(pressure);
-      double z = DataboxZ(pressure);
-      
-      double dx = DataboxDx(pressure);
-      double dy = DataboxDy(pressure);
-      double dz = DataboxDz(pressure);
-
-      /* create the new databox structure for the water table depth  */
-      if ( (factor_safety = NewDatabox(nx, ny, nz, x, y, z, dx, dy, dz)) )
-      {
-    /* Make sure the data set pointer was added to */
-    /* the hash table successfully.                */
-    if (!AddData(data, factor_safety, filename, factor_safety_hashkey))
-       FreeDatabox(factor_safety); 
-    else
-    {
-       Tcl_AppendElement(interp, factor_safety_hashkey); 
-    } 
-
-    ComputeFactorSafetyold(alpha, n, theta_resid, theta_sat, cohesion, porosity, friction_angle,
-      top, slope_x, slope_y, pressure, saturation, factor_safety);
-      }
-      else
-      {
-    ReadWriteError(interp);
-    return TCL_ERROR;
-      }
-   }
-
-   return TCL_OK;
-}
 
 /*-----------------------------------------------------------------------
  * routine for `fsextracttop' command
@@ -956,4 +775,143 @@ int            FSExtractTopCommand(
    return TCL_OK;
 }
 
-   
+/*-----------------------------------------------------------------------
+ * routine for `fssave' command
+ * Description: The first argument to this command is the hashkey of the
+ *              dataset to be saved, the second is the format of the 
+ *              file the data is to be saved in.
+ * Cmd. syntax: fssave dataset -filetype filename
+ *-----------------------------------------------------------------------*/
+
+int               SaveFSCommand(
+   ClientData        clientData,
+   Tcl_Interp       *interp,
+   int               argc,
+   char             *argv[])
+{
+   Data          *data = (Data *)clientData;
+
+   char          *filetype, *filename;
+   FILE          *fp = NULL;
+
+   char          *hashkey;
+   Tcl_HashEntry *entryPtr; 
+   Databox       *databox;
+
+    
+
+   /* The command three arguments */
+
+   if (argc != 4)
+   {
+      WrongNumArgsError(interp, SAVEFSUSAGE);
+      return TCL_ERROR;
+   }
+
+   hashkey = argv[1];
+
+   /* Make sure the dataset exists */
+
+   if ((databox = DataMember(data, hashkey, entryPtr)) == NULL)
+   {
+      SetNonExistantError(interp, hashkey);
+      return TCL_ERROR;
+   }
+
+   /* Check for an option specifying the file type */
+
+   if (*argv[2] != '-')
+   {
+      MissingOptionError(interp, 1, SAVEFSUSAGE);
+      return TCL_ERROR;
+   }
+
+   filetype = argv[2] + 1;
+
+   /* Validate the file type */
+
+   if (!IsValidFileType(filetype))
+   {
+      InvalidOptionError(interp, 1, SAVEFSUSAGE);
+      return TCL_ERROR;
+   }
+
+   filename = argv[3];
+
+   /* Execute the appropriate file printing routine */
+   if (strcmp(filetype, "pfb") == 0) {
+      /* Make sure the file could be opened */
+      if ((fp = fopen(filename, "wb")) == NULL)
+      {
+	 ReadWriteError(interp);
+	 return TCL_ERROR;
+      }
+      
+      PrintParflowB(fp, databox);
+   }
+   else if (strcmp(filetype, "sa") == 0) {
+      /* Make sure the file could be opened */
+      if ((fp = fopen(filename, "wb")) == NULL)
+      {
+	 ReadWriteError(interp);
+	 return TCL_ERROR;
+      }
+      
+      PrintSimpleA(fp, databox);
+   }
+
+
+   else if (strcmp(filetype, "sa2d") == 0) {
+      /* Make sure the file could be opened */
+      if ((fp = fopen(filename, "wb")) == NULL)
+      {
+         ReadWriteError(interp);
+         return TCL_ERROR;
+      }
+
+      PrintSimpleA2D(fp, databox);
+   }   
+
+
+   else if (strcmp(filetype, "sb") == 0) {
+      /* Make sure the file could be opened */
+      if ((fp = fopen(filename, "wb")) == NULL)
+      {
+	 ReadWriteError(interp);
+	 return TCL_ERROR;
+      }
+      
+      PrintSimpleB(fp, databox);
+   }
+   else if (strcmp(filetype, "fld") == 0) {
+      /* Make sure the file could be opened */
+      if ((fp = fopen(filename, "wb")) == NULL)
+      {
+	 ReadWriteError(interp);
+	 return TCL_ERROR;
+      }
+      
+      PrintAVSField(fp, databox);
+   }
+   else if (strcmp(filetype, "vis") == 0) {
+      /* Make sure the file could be opened */
+      if ((fp = fopen(filename, "wb")) == NULL)
+      {
+	 ReadWriteError(interp);
+	 return TCL_ERROR;
+      }
+      
+      PrintVizamrai(fp, databox);
+   }
+#ifdef HAVE_SILO
+   else if (strcmp(filetype, "silo") == 0) {
+      PrintSilo(filename, databox);
+   }
+#endif
+
+   /* Close the file, if opened */
+   if(fp) {
+      fclose(fp);
+   }
+   return TCL_OK;
+}   

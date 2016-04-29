@@ -71,8 +71,8 @@ void FSTExitProc P((ClientData clientData ));
 int LoadFSPFCommand P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
 
 int FactorSafetyCommand P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
-int FactorSafetyCommandold P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
 int FSExtractTopCommand P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
+int SaveFSCommand P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
 
 #undef P
 

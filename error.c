@@ -205,6 +205,23 @@ void        MissingFilenameError(
                             "\n", usage, (char *) NULL);
 }
 
+/* ----------------------------------------------------------------------
+ * Assign a missing filenameoption error message to the Tcl result
+ *-----------------------------------------------------------------------*/
+
+void        MissingOptionError(
+   Tcl_Interp *interp,
+   int         argnum,
+   char       *usage)
+{
+   char num[256];
+
+   sprintf(num, "%d", argnum);
+   Tcl_AppendResult(interp, "\nError: Option missing after argument ", num,
+                            "\n", usage, (char *) NULL);
+}
+
+
 /*-----------------------------------------------------------------------
  * Assign an invalid file extension error message to the Tcl result
  *-----------------------------------------------------------------------*/
