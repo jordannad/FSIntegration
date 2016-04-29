@@ -20,11 +20,11 @@ TCLINC=/usr/include/tcl8.6
 TCLLIB=/usr/lib/tcl8.6
 
 #define the C header files (this is not used anywhere?)
-HDRS = databox.h error.h file.h grid.h load.h readdatabox.h \
+HDRS = databox.h error.h file.h grid.h load.h readdatabox.h top.h \
 	region.h tools_io.h general.h usergrid.h pfload_file.h factorsafety.h fstools.h 
 
 #define the C source files
-SRCS = databox.c error.c file.c grid.c load.c readdatabox.c \
+SRCS = databox.c error.c file.c grid.c load.c readdatabox.c top.c \
        region.c tools_io.c usergrid.c factorsafety.c fstools.c fsappinit.c 
 
 #define the C object files

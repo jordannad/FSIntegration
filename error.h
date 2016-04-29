@@ -25,8 +25,9 @@
  * Error messages
  *------------------------------------------------------------------------*/
 
-static char *FACTORSAFETYUSAGE = "Usage: getfactorsafety alpha n theta_resid theta_sat cohesion porosity friction_angle top slope_x slope_y pressure saturation\n";
-
+static char *FACTORSAFETYUSAGE = "Usage: getfactorsafety alpha n theta_resid theta_sat cohesion porosity friction_angle top slope_x slope_y pressure saturation failuredepth\n";
+static char *FSEXTRACTTOPUSAGE          = "Usage: pfextracttop top dataset\n";
+/*static char *LOADPFUSAGE = "Usage: pfload [-filetype] filename\n file types: pfb pfsb sa sb rsa \n"; */
 /*-----------------------------------------------------------------------
  * function prototypes
  *-----------------------------------------------------------------------*/
@@ -45,7 +46,11 @@ int  IsValidFileType ANSI_PROTO((char *option));
 char *GetValidFileExtension ANSI_PROTO((char *filename));
 
 /* Function prototypes for creating error messages  */
+void InvalidOptionError ANSI_PROTO((Tcl_Interp *interp, int argnum, char *usage));
+void MissingFilenameError ANSI_PROTO((Tcl_Interp *interp, int argnum, char *usage));
+void InvalidFileExtensionError ANSI_PROTO((Tcl_Interp *interp, int argnum, char *usage));
 
+void NotADoubleError ANSI_PROTO((Tcl_Interp *interp, int argnum, char *usage));
 void WrongNumArgsError ANSI_PROTO((Tcl_Interp *interp, char *usage));
 void SetNonExistantError ANSI_PROTO((Tcl_Interp *interp, char *hashkey)); 
 void ReadWriteError ANSI_PROTO((Tcl_Interp *interp));

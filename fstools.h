@@ -70,7 +70,8 @@ int AddData P((Data *data , Databox *databox , char *label , char *hashkey ));
 void FSTExitProc P((ClientData clientData ));
 
 int FactorSafetyCommand P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
-
+int FactorSafetyCommandold P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
+int FSExtractTopCommand P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
 
 #undef P
 

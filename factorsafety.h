@@ -22,7 +22,7 @@
  *-----------------------------------------------------------------------*/
 
 /* factorsafety.c */
-void ComputeFactorSafety(
+void ComputeFactorSafetyold(
    Databox *alpha, Databox *n, Databox *theta_resid, Databox *theta_sat,
    Databox *cohesion,
    Databox *porosity,
@@ -32,7 +32,18 @@ void ComputeFactorSafety(
    Databox *slope_y,
    Databox *pressure, 
    Databox *saturation,
-   Databox *factor_safety);
+   Databox *factor_safety); 
    
-
+void ComputeFactorSafety(Databox *alpha, Databox *n, Databox *theta_resid, Databox *theta_sat,
+   Databox *cohesion,
+   Databox *porosity,
+   Databox *friction_angle,
+   Databox *top,
+   Databox *slope_x,
+   Databox *slope_y,
+   Databox *pressure, 
+   Databox *saturation,
+   Databox *uws_sat,
+   Databox *factor_safety,
+   double failureDepth);
 #endif

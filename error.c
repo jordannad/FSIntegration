@@ -126,6 +126,20 @@ char *GetValidFileExtension(
 /* These functions append various error messages to the Tcl result.       */
 /*------------------------------------------------------------------------*/
 
+
+void	   NotADoubleError(
+   Tcl_Interp *interp,
+   int        argnum,
+   char       *usage)
+{
+
+   char num[256];
+
+   sprintf(num, "%d", argnum);
+   Tcl_ResetResult(interp);
+   Tcl_AppendResult(interp, "\nError: Double floating point number missing at argument ", num, "\n", usage, (char *) NULL);
+}
+
 /*------------------------------------------------------------------------
  * This function appends a wrong number of arguments error to the Tcl result.
  *------------------------------------------------------------------------*/
@@ -159,3 +173,51 @@ void	ReadWriteError(Tcl_Interp *interp)
    Tcl_SetResult(interp, "\nError: The file could not be accessed or there is not enough memory available \n", TCL_STATIC);
 }
 
+/*------------------------------------------------------------------------
+ * This function appends an invalid option error to the Tcl result.
+ *------------------------------------------------------------------------*/
+
+void        InvalidOptionError(
+   Tcl_Interp *interp,
+   int         argnum,
+   char       *usage)
+{
+   char num[256];
+
+   sprintf(num, "%d", argnum);
+   Tcl_AppendResult(interp, "Error: Argument ", num, " is an invalid option\n", 
+                    usage, (char *) NULL);
+}
+
+/*-----------------------------------------------------------------------
+ * Assign a missing filename error message to the Tcl result
+ *-----------------------------------------------------------------------*/
+
+void        MissingFilenameError(
+   Tcl_Interp *interp,
+   int         argnum,
+   char       *usage)
+{
+   char num[256];
+
+   sprintf(num, "%d", argnum);
+   Tcl_AppendResult(interp, "\nError: Filename missing after argument ", num,
+                            "\n", usage, (char *) NULL);
+}
+
+/*-----------------------------------------------------------------------
+ * Assign an invalid file extension error message to the Tcl result
+ *-----------------------------------------------------------------------*/
+
+void        InvalidFileExtensionError(
+   Tcl_Interp *interp,
+   int         argnum,
+   char       *usage)
+{
+   char num[256];
+   
+   sprintf(num, "%d", argnum);
+   Tcl_AppendResult(interp, "\nError: Argument ", num,
+                    " is a filename with an unknown extension\n", usage, 
+                    (char *) NULL); 
+}

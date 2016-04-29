@@ -110,9 +110,11 @@ DllEntryPoint(hInst, reason, reserved)
 
 EXPORT(int,Factorsafety_Init)(Tcl_Interp *interp)
 {
+  /*
   if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL) {
     return TCL_ERROR;
   }
+  */
 
    Data *data;
 
@@ -127,6 +129,8 @@ EXPORT(int,Factorsafety_Init)(Tcl_Interp *interp)
      ***********************************************************************/
  
    Tcl_CreateCommand(interp, "FactorSafety::getfactorsafety", (Tcl_CmdProc *)FactorSafetyCommand,
+                     (ClientData) data, (Tcl_CmdDeleteProc *) NULL);
+   Tcl_CreateCommand(interp, "FactorSafety::getfstop", (Tcl_CmdProc *)FSExtractTopCommand,
                      (ClientData) data, (Tcl_CmdDeleteProc *) NULL);
    
 #ifdef SGS

@@ -52,6 +52,7 @@
 #include "grid.h"
 #include "error.h"
 #include "general.h"
+#include "top.h"
 
 
 /**
@@ -158,11 +159,14 @@ double GetDouble(Tcl_Interp *interp, char *key)
 
 Data    *InitFSToolsData()
 {
+   
    Data *new_data;  /* Data structure used to hold data set hash table */
 
+   /* Allocate what will eventually hold the hash table */
    if ((new_data = (Data*)calloc(1, sizeof (Data))) == NULL)
       return (NULL);
 
+   /*Initialize the hashtable*/
    Tcl_InitHashTable(&DataMembers(new_data), TCL_STRING_KEYS);
 
    DataGridType(new_data) = cell;
@@ -337,6 +341,227 @@ int            FactorSafetyCommand(
    int            argc,
    char          *argv[])
 {
+
+   Data *data = (Data *)clientData;
+   Tcl_HashEntry *entryPtr;  /* Points to new hash table entry         */
+   
+
+   /* Type declarations for variables passed into computefactorsafety function 
+    * in factorsafety.c */
+   /* inputs */
+   Databox *alpha;
+   Databox *n;
+   Databox *theta_resid;
+   Databox *theta_sat;
+   Databox *cohesion;
+   Databox *porosity;
+   Databox *friction_angle;
+   Databox *top;
+   Databox *slope_x;
+   Databox *slope_y;
+   Databox *pressure; 
+   Databox *saturation;
+   Databox *uws_sat;
+   double failureDepth;
+
+   /* Outputs */
+   Databox *factor_safety;
+
+   /* Hashkeys to databox variables (used by tcl interp?) */
+   /* Inputs */
+   char       *alpha_hashkey;
+   char       *n_hashkey;
+   char       *theta_resid_hashkey;
+   char       *theta_sat_hashkey;
+   char       *cohesion_hashkey;
+   char       *porosity_hashkey;
+   char       *friction_angle_hashkey;
+   char       *top_hashkey;
+   char       *slope_x_hashkey;
+   char       *slope_y_hashkey;
+   char       *pressure_hashkey; 
+   char	      *saturation_hashkey;
+   char       *uws_sat_hashkey;
+
+   /* Outputs */
+   char       *filename = "factor safety";
+   char        factor_safety_hashkey[MAX_KEY_SIZE];
+  
+
+   /* Check and see if there are enough arguments following  */
+   /* the command.                                           */
+   if (argc <= 14)
+   {
+      printf("Number of arguments = %d\n", argc);
+      WrongNumArgsError(interp, FACTORSAFETYUSAGE);
+      return TCL_ERROR;
+   }
+
+   int k;
+   for (k = 1; k < argc; k++) {
+    
+     printf("Output of argv[%d]= %s \n", k, argv[k]);
+   }
+   alpha_hashkey = argv[1];
+   n_hashkey = argv[2];
+   theta_resid_hashkey = argv[3];
+   theta_sat_hashkey = argv[4];
+   cohesion_hashkey = argv[5];
+   porosity_hashkey = argv[6];
+   friction_angle_hashkey = argv[7];
+   top_hashkey = argv[8];
+   slope_x_hashkey = argv[9];
+   slope_y_hashkey = argv[10];
+   pressure_hashkey = argv[11];
+   saturation_hashkey = argv[12];
+   uws_sat_hashkey = argv[13];
+  
+   if (Tcl_GetDouble(interp, argv[14], &failureDepth) == TCL_ERROR)
+   {
+     NotADoubleError(interp, 1, FACTORSAFETYUSAGE);
+     return TCL_ERROR;
+   }
+   printf("Got here after double check: %f\n", failureDepth);
+
+   int checkVal = DataTotalMem(data);
+   printf("Total number of members in the hashtable: %d\n", checkVal);
+   
+   if ((alpha = DataMember(data, alpha_hashkey, entryPtr)) == NULL)
+   {
+      SetNonExistantError(interp, alpha_hashkey);
+      return TCL_ERROR;
+   }
+
+
+   if ((top = DataMember(data, top_hashkey, entryPtr)) == NULL)
+   {
+      SetNonExistantError(interp, top_hashkey);
+      return TCL_ERROR;
+   }
+   
+
+  
+    if ((n = DataMember(data, n_hashkey, entryPtr)) == NULL)
+   {
+      SetNonExistantError(interp, n_hashkey);
+      return TCL_ERROR;
+   }
+
+    if ((theta_resid = DataMember(data, theta_resid_hashkey, entryPtr)) == NULL)
+   {
+      SetNonExistantError(interp, theta_resid_hashkey);
+      return TCL_ERROR;
+   }
+
+   if ((theta_sat = DataMember(data, theta_sat_hashkey, entryPtr)) == NULL)
+   {
+      SetNonExistantError(interp, theta_sat_hashkey);
+      return TCL_ERROR;
+   }
+
+   if ((cohesion = DataMember(data, cohesion_hashkey, entryPtr)) == NULL)
+   {
+      SetNonExistantError(interp, cohesion_hashkey);
+      return TCL_ERROR;
+   }
+
+   if ((friction_angle = DataMember(data, friction_angle_hashkey, entryPtr)) == NULL)
+   {
+      SetNonExistantError(interp, friction_angle_hashkey);
+      return TCL_ERROR;
+   }
+
+   if ((porosity = DataMember(data, porosity_hashkey, entryPtr)) == NULL)
+   {
+      SetNonExistantError(interp, porosity_hashkey);
+      return TCL_ERROR;
+   }
+
+   if ((slope_x = DataMember(data, slope_x_hashkey, entryPtr)) == NULL)
+   {
+      SetNonExistantError(interp, slope_x_hashkey);
+      return TCL_ERROR;
+   }
+
+   if ((slope_y = DataMember(data, slope_y_hashkey, entryPtr)) == NULL)
+   {
+      SetNonExistantError(interp, slope_y_hashkey);
+      return TCL_ERROR;
+   }
+
+   if ((pressure = DataMember(data, pressure_hashkey, entryPtr)) == NULL)
+   {
+      SetNonExistantError(interp, pressure_hashkey);
+      return TCL_ERROR;
+   }
+
+    if ((saturation = DataMember(data, saturation_hashkey, entryPtr)) == NULL)
+   {
+      SetNonExistantError(interp, saturation_hashkey);
+      return TCL_ERROR;
+   }
+
+   if ((uws_sat = DataMember(data, uws_sat_hashkey, entryPtr)) == NULL)
+   {
+      SetNonExistantError(interp, uws_sat_hashkey);
+      return TCL_ERROR;
+   }
+
+    
+   {
+      int nx = DataboxNx(pressure);
+      int ny = DataboxNy(pressure);
+      int nz = DataboxNz(pressure);
+
+      double x = DataboxX(pressure);
+      double y = DataboxY(pressure);
+      double z = DataboxZ(pressure);
+      
+      double dx = DataboxDx(pressure);
+      double dy = DataboxDy(pressure);
+      double dz = DataboxDz(pressure);
+
+   printf("Got here check nz = %d\n", nz);
+
+      /* create the new databox structure for the water table depth  */
+      if ( (factor_safety = NewDatabox(nx, ny, nz, x, y, z, dx, dy, dz)) )
+      {
+    /* Make sure the data set pointer was added to */
+    /* the hash table successfully.                */
+    if (!AddData(data, factor_safety, filename, factor_safety_hashkey))
+       FreeDatabox(factor_safety); 
+    else
+    {
+       Tcl_AppendElement(interp, factor_safety_hashkey); 
+    } 
+
+    ComputeFactorSafety(alpha, n, theta_resid, theta_sat, cohesion, porosity, friction_angle,
+      top, slope_x, slope_y, pressure, saturation, uws_sat, factor_safety, failureDepth);
+      }
+      else
+      {
+    ReadWriteError(interp);
+    return TCL_ERROR;
+      }
+   }
+
+   return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------
+ * routine for `computefactorsafety' command
+ * Description: Compute the factor of safety
+ * 
+ * Cmd. syntax: computefactorsafety alpha, n, theta_resid, theta_sat, cohesion, 
+                porosity, friction_angle, top, slope_x, slope_y, pressure saturation
+
+ *-----------------------------------------------------------------------*/
+int            FactorSafetyCommandold(
+   ClientData     clientData,
+   Tcl_Interp    *interp,
+   int            argc,
+   char          *argv[])
+{
    Tcl_HashEntry *entryPtr;  /* Points to new hash table entry         */
    Data       *data = (Data *)clientData;
 
@@ -493,13 +718,98 @@ int            FactorSafetyCommand(
        Tcl_AppendElement(interp, factor_safety_hashkey); 
     } 
 
-    ComputeFactorSafety(alpha, n, theta_resid, theta_sat, cohesion, porosity, friction_angle,
+    ComputeFactorSafetyold(alpha, n, theta_resid, theta_sat, cohesion, porosity, friction_angle,
       top, slope_x, slope_y, pressure, saturation, factor_safety);
       }
       else
       {
     ReadWriteError(interp);
     return TCL_ERROR;
+      }
+   }
+
+   return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------
+ * routine for `fsextracttop' command
+ * Description: Extract the top cells of a dataset.
+ * 
+ * Cmd. syntax: fsextracttop top data
+ *-----------------------------------------------------------------------*/
+int            FSExtractTopCommand(
+   ClientData     clientData,
+   Tcl_Interp    *interp,
+   int            argc,
+   char          *argv[])
+{
+   Tcl_HashEntry *entryPtr;  /* Points to new hash table entry         */
+   Data       *data = (Data *)clientData;
+
+   Databox    *top;
+   Databox    *databox;
+   Databox    *top_values;
+
+   char       *filename = "top values";
+   char       *top_hashkey;
+   char       *data_hashkey;
+
+   char        newhashkey[MAX_KEY_SIZE];
+
+   /* Check and see if there is at least one argument following  */
+   /* the command.                                               */
+   if (argc == 2)
+   {
+      WrongNumArgsError(interp, FSEXTRACTTOPUSAGE);
+      return TCL_ERROR;
+   }
+
+   top_hashkey = argv[1];
+   data_hashkey = argv[2];
+
+   if ((top = DataMember(data, top_hashkey, entryPtr)) == NULL)
+   {
+      SetNonExistantError(interp, top_hashkey);
+      return TCL_ERROR;
+   }
+
+   if ((databox = DataMember(data, data_hashkey, entryPtr)) == NULL)
+   {
+      SetNonExistantError(interp, data_hashkey);
+      return TCL_ERROR;
+   }
+
+   {
+      int nx = DataboxNx(databox);
+      int ny = DataboxNy(databox);
+
+      double x = DataboxX(databox);
+      double y = DataboxY(databox);
+      double z = DataboxZ(databox);
+      
+      double dx = DataboxDx(databox);
+      double dy = DataboxDy(databox);
+      double dz = DataboxDz(databox);
+
+      /* create the new databox structure for top */
+      if ( (top_values = NewDatabox(nx, ny, 1, x, y, z, dx, dy, dz)) )
+      {
+	 /* Make sure the data set pointer was added to */
+	 /* the hash table successfully.                */
+
+	 if (!AddData(data, top_values, filename, newhashkey))
+	    FreeDatabox(top); 
+	 else
+	 {
+	    Tcl_AppendElement(interp, newhashkey); 
+	 } 
+
+	 ExtractTop(top, databox, top_values);
+      }
+      else
+      {
+	 ReadWriteError(interp);
+	 return TCL_ERROR;
       }
    }
 
