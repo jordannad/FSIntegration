@@ -87,14 +87,18 @@ void ComputeFactorSafety(Databox *alpha, Databox *n, Databox *theta_resid, Datab
          p_min = 100.0;
          uwssum = 0.0;
   	 double moisture_content;
-         
+         int fsDataBoxZ = 0;
+
          if ((i == 1) && (j == 1)) {
                printf("Printing at i = 1, j = 1, top = %d\n", k_top);
          }
          /* Loop over the top soil layers for which FOS calcs are to be performed */
          for (k = k_top; k >= (k_top - fs_nz); k--) {
 	    depth = (k_top - k)*dz; /*Depth below the surface */
-            
+            fsDataBoxZ = fs_nz - (k_top - k);
+            if ((i == 1) && (j == 1)) {
+               printf("Printing at i = 1, j = 1, fsDataBoxnz = %d\n", fsDataBoxZ);
+         }
             /* Testing depth- confirms looping from surface to 3.0m below everywhere*/
 
             if ((i == 1) && (j == 1)) {
@@ -174,7 +178,7 @@ void ComputeFactorSafety(Databox *alpha, Databox *n, Databox *theta_resid, Datab
               }
          
 
-           *(DataboxCoeff(factor_safety, i, j, k)) = factor_safety_val;
+           *(DataboxCoeff(factor_safety, i, j, fsDataBoxZ)) = factor_safety_val;
 	   } 
       }
    }

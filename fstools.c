@@ -46,6 +46,7 @@
 #define strdup _strdup
 #endif
 
+#include "math.h"
 #include "readdatabox.h"
 #include "printdatabox.h"
 #include "fstools.h"
@@ -661,11 +662,14 @@ int            FactorSafetyCommand(
       double dx = DataboxDx(pressure);
       double dy = DataboxDy(pressure);
       double dz = DataboxDz(pressure);
+      
+      /* Trying out new size of data structure for factor safety databox */
+      int fs_nz = round(failureDepth/dz);
 
-   printf("Got here check nz = %d\n", nz);
+      printf("Got here check nz = %d, fs_nz = %d\n", nz, fs_nz);
 
       /* create the new databox structure for the water table depth  */
-      if ( (factor_safety = NewDatabox(nx, ny, nz, x, y, z, dx, dy, dz)) )
+      if ( (factor_safety = NewDatabox(nx, ny, fs_nz, x, y, z, dx, dy, dz)) )
       {
     /* Make sure the data set pointer was added to */
     /* the hash table successfully.                */
