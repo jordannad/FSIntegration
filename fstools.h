@@ -73,7 +73,8 @@ int LoadFSPFCommand P((ClientData clientData , Tcl_Interp *interp , int argc , c
 int FactorSafetyCommand P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
 int FSExtractTopCommand P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
 int SaveFSCommand P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
-
+int ZatFSMinCommand P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
+int PressatFSMinCommand P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
 #undef P
 
 #endif

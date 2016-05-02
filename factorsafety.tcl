@@ -62,5 +62,7 @@ namespace eval FactorSafety {
     namespace export getfstop
     namespace export fspfload
     namespace export fssave
+    namespace export getzatfsmin
+    namespace export computepressatfsmin
 }
 

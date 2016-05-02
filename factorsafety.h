@@ -35,4 +35,6 @@ void ComputeFactorSafety(Databox *alpha, Databox *n, Databox *theta_resid, Datab
    Databox *uws_sat,
    Databox *factor_safety,
    double failureDepth);
+void ComputeZMin(Databox *factor_safety,  Databox *zmin);
+void ComputePressatFSMin(Databox *factor_safety, Databox *pressure, Databox *top, Databox *pressFSMin);
 #endif

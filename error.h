@@ -27,8 +27,11 @@
 
 static char *FACTORSAFETYUSAGE = "Usage: getfactorsafety alpha n theta_resid theta_sat cohesion porosity friction_angle top slope_x slope_y pressure saturation failuredepth\n";
 static char *FSEXTRACTTOPUSAGE          = "Usage: pfextracttop top dataset\n";
-static char *LOADPFUSAGE = "Usage: pfload [-filetype] filename\n file types: pfb pfsb sa sb rsa \n";
+static char *LOADPFUSAGE = "Usage: fsload [-filetype] filename\n file types: pfb pfsb sa sb rsa \n";
 static char *SAVEFSUSAGE = "Usage: fssave dataset -filetype filename\n      file types: pfb sa sb \n";
+static char *ZMINUSAGE = "Usage: computezatfsmin factorSafety\n";
+static char *PRESSATFSMINUSAGE = "Usage: computepressatfsmin factorSafety Pressure Top\n";
+
 /*-----------------------------------------------------------------------
  * function prototypes
  *-----------------------------------------------------------------------*/

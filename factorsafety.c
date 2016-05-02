@@ -184,3 +184,130 @@ void ComputeFactorSafety(Databox *alpha, Databox *n, Databox *theta_resid, Datab
    }
 }
 
+
+/* New function to compute the depth to minimum factor of safety value */
+
+/* NOTE: This function should return a 2D databox (i.e. nz = 1) */
+
+void ComputeZMin(Databox *factor_safety,  Databox *zmin)
+{
+   
+   int             i,  j,  k;
+   int             nx, ny, nz;
+   double          dx, dy, dz;
+   double          depth, factor_safety_val, fs_min, z_fsmin, p_min;
+
+   nx = DataboxNx(factor_safety);
+   ny = DataboxNy(factor_safety);
+   nz = DataboxNz(factor_safety);
+
+   dx = DataboxDx(factor_safety);
+   dy = DataboxDy(factor_safety);
+   dz = DataboxDz(factor_safety);
+   printf("Got here in ComputeZMin check dx = %f, dy = %f, dz = %f\n", dx, dy, dz); 
+   printf("Got here in ComputeZMin check nx = %d, ny = %d, nz = %d\n", nx, ny, nz);
+   /* Calculate factor of safety at the failure surface of the domain */
+  
+
+   /* Loop over all surface cells (first i (x) then j (y) direction) */
+   for (j = 0; j < ny; j++)
+   {
+      for (i = 0; i < nx; i++)
+      {
+         	  
+         /* Initialize result variables */
+         fs_min = 1000;
+         z_fsmin = 1.0e25;
+         p_min = 100.0;
+         
+         /* Loop over the top soil layers for which FOS calcs are to be performed */
+         for (k = 0; k < nz; k++) {
+	    depth = (k+1)*dz; /*Depth below the surface */
+            
+            if ((i == 1) && (j == 1)) {
+               printf("Printing depth at i = 1, j = 1, k = %d, Depth = %f\n", k,depth);
+            } 
+            
+ 	    factor_safety_val = *(DataboxCoeff(factor_safety, i, j, k));
+
+            if (factor_safety_val < fs_min) {
+               fs_min = factor_safety_val;
+               z_fsmin = (k+1)*dz;
+            }
+         }
+
+         *(DataboxCoeff(zmin, i, j, 0)) = z_fsmin;
+         printf("Printing depth at i = %d, j = %d, Zmin = %f\n", i, j, z_fsmin);
+	    
+      }
+   }
+   /*printf("Got here at the end of zmin function, k = %d\n", k);*/
+
+}
+
+/* New function to compute the depth to minimum factor of safety value */
+
+/* NOTE: This function should return a 2D databox (i.e. nz = 1) */
+
+void ComputePressatFSMin(Databox *factor_safety, Databox *pressure, Databox *top, Databox *pressFSMin)
+{
+   
+   int             i,  j,  k, k_top, fs_k;
+   int             nx, ny, nz;
+   double          dx, dy, dz;
+   double          depth, factor_safety_val, pressure_val, fs_min, p_min;
+ 
+
+
+   nx = DataboxNx(factor_safety);
+   ny = DataboxNy(factor_safety);
+   nz = DataboxNz(factor_safety);
+
+   dx = DataboxDx(factor_safety);
+   dy = DataboxDy(factor_safety);
+   dz = DataboxDz(factor_safety);
+   printf("Got here in ComputePressatFSMin check dx = %f, dy = %f, dz = %f\n", dx, dy, dz); 
+   printf("Got here in ComputePressatFSMin check nx = %d, ny = %d, nz = %d\n", nx, ny, nz);
+   
+   /* Loop over all surface cells (first i (x) then j (y) direction) */
+   for (j = 0; j < ny; j++)
+   {
+      for (i = 0; i < nx; i++)
+      {
+         	  
+         /* Initialize result variables */
+         fs_min = 1000;
+         p_min = 100.0;
+
+
+         k_top = *(DataboxCoeff(top, i, j, 0));
+         
+         /* Loop over the top soil layers for which FOS calcs are to be performed */
+         /* Loop over the top soil layers for which FOS calcs are to be performed */
+         for (k = k_top; k >= (k_top - nz); k--) {
+         
+	    depth = (k-k_top+1)*dz; /*Depth below the surface */
+            fs_k = k - k_top;
+
+            if ((i == 1) && (j == 1)) {
+               printf("Printing depth at i = 1, j = 1, k = %d, Depth = %f\n", k,depth);
+            } 
+            
+ 	    factor_safety_val = *(DataboxCoeff(factor_safety, i, j, fs_k));
+            pressure_val = *(DataboxCoeff(pressure, i, j, k));
+
+            if (factor_safety_val < fs_min) {
+               fs_min = factor_safety_val;
+               p_min = pressure_val;
+            }
+         }
+
+         *(DataboxCoeff(pressFSMin, i, j, 0)) = p_min;
+         printf("Printing depth at i = %d, j = %d, press at fsmin = %f\n", i, j, p_min);
+	    
+      }
+   }
+   /*printf("Got here at the end of zmin function, k = %d\n", k);*/
+
+}
+

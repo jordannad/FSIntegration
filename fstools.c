@@ -345,6 +345,7 @@ int            LoadFSPFCommand(
    int            argc,
    char          *argv[])
 {
+   printf("I am in here, args: %d", argc);
    Data       *data = (Data *)clientData;
 
    Databox    *databox;
@@ -919,3 +920,243 @@ int               SaveFSCommand(
    }
    return TCL_OK;
 }   
+
+
+/*-----------------------------------------------------------------------
+ * routine for `computezatfsmin' command
+ * Description: Compute the depth associated with the minimum factor of safety
+ * 		for shallow rain induced landslides
+ * Cmd. syntax: computezatfismin factorsafety
+
+ *-----------------------------------------------------------------------*/
+int            ZatFSMinCommand(
+   ClientData     clientData,
+   Tcl_Interp    *interp,
+   int            argc,
+   char          *argv[])
+{
+
+   /* Grab the parflow data pointer */
+   printf("Got here %d \n", argc);
+   Data *data = (Data *)clientData;
+   Tcl_CmdInfo cmdInfo;
+   if (Tcl_GetCommandInfo(interp, "Parflow::pfload", &cmdInfo) == 1) {
+      data = cmdInfo.clientData;
+      printf("In CmdInfo in fstools computezatfsmincommand func... data is: %p\n", data);
+   } else {
+      printf("ERROR HERE?!?!?!?!\n");
+      return TCL_ERROR;
+   }
+   Tcl_HashEntry *entryPtr;  /* Points to new hash table entry         */
+   
+
+   /* Type declarations for variables passed into computefactorsafety function 
+    * in factorsafety.c */
+   /* inputs */
+   Databox *factor_safety;
+
+   /* Hashkeys to databox variables (used by tcl interp?) */
+   /* Inputs */
+   char       *factor_safety_hashkey;
+
+   /* Outputs */
+   Databox    *zminfs;
+   char       *filename = "depth minFS";
+   char        zminfs_hashkey[MAX_KEY_SIZE];
+  
+
+   /* Check and see if there are enough arguments following  */
+   /* the command.                                           */
+   if (argc <= 1)
+   {
+      printf("Number of arguments = %d\n", argc);
+      WrongNumArgsError(interp, ZMINUSAGE);
+      return TCL_ERROR;
+   }
+
+   int k;
+   for (k = 0; k < argc; k++) {
+    
+     printf("Output of argv[%d]= %s \n", k, argv[k]);
+   }
+   factor_safety_hashkey = argv[1];
+
+   /* int checkVal = DataTotalMem(data);
+   printf("Total number of members in the hashtable: %d\n", checkVal); */
+   
+   if ((factor_safety = DataMember(data, factor_safety_hashkey, entryPtr)) == NULL)
+   {
+      SetNonExistantError(interp, factor_safety_hashkey);
+      return TCL_ERROR;
+   }
+
+    
+   {
+      int nx = DataboxNx(factor_safety);
+      int ny = DataboxNy(factor_safety);
+      int nz = 1;
+
+      double x = DataboxX(factor_safety);
+      double y = DataboxY(factor_safety);
+      double z = DataboxZ(factor_safety);
+      
+      double dx = DataboxDx(factor_safety);
+      double dy = DataboxDy(factor_safety);
+      double dz = DataboxDz(factor_safety);
+     
+      printf("nx = %d, ny = %d, dx = %f, dy = %f, dz = %f\n", nx, ny, dx, dy, dz);
+      /* create the new databox structure for the depth where factor of safety is minimum  */
+      if ( (zminfs = NewDatabox(nx, ny, 1, x, y, z, dx, dy, dz)) )
+      {
+    /* Make sure the data set pointer was added to */
+    /* the hash table successfully.                */
+    if (!AddData(data, zminfs, filename, zminfs_hashkey)) {
+       printf("Right before call to FreeDatabox");
+       FreeDatabox(zminfs); 
+    } else
+    {
+       Tcl_AppendElement(interp, zminfs_hashkey); 
+    } 
+
+    ComputeZMin(factor_safety, zminfs);
+    /*printf("Error in free() happens after this point 1");*/
+      }
+      else
+      {
+    ReadWriteError(interp);
+    return TCL_ERROR;
+      }
+   }
+
+   /*printf("Error in free() happens after this point 2");*/
+   return TCL_OK;
+}
+
+
+/*-----------------------------------------------------------------------
+ * routine for `computepressatfsmin' command
+ * Description: Compute the depth associated with the minimum factor of safety
+ * 		for shallow rain induced landslides
+ * Cmd. syntax: computezatfismin factorsafety
+
+ *-----------------------------------------------------------------------*/
+int            PressatFSMinCommand(
+   ClientData     clientData,
+   Tcl_Interp    *interp,
+   int            argc,
+   char          *argv[])
+{
+
+   /* Grab the parflow data pointer */
+   printf("Got here in press at fs min command, numargs = %d \n", argc);
+   Data *data = (Data *)clientData;
+   Tcl_CmdInfo cmdInfo;
+   if (Tcl_GetCommandInfo(interp, "Parflow::pfload", &cmdInfo) == 1) {
+      data = cmdInfo.clientData;
+      printf("In CmdInfo in fstools computezatfsmincommand func... data is: %p\n", data);
+   } else {
+      printf("ERROR HERE?!?!?!?!\n");
+      return TCL_ERROR;
+   }
+   Tcl_HashEntry *entryPtr;  /* Points to new hash table entry         */
+   
+
+   /* Type declarations for variables passed into computefactorsafety function 
+    * in factorsafety.c */
+   /* inputs */
+   Databox *factor_safety;
+   Databox *pressure;
+   Databox *top;
+
+   /* Hashkeys to databox variables (used by tcl interp?) */
+   /* Inputs */
+   char       *factor_safety_hashkey;
+   char       *pressure_hashkey;
+   char       *top_hashkey;
+
+   /* Outputs */
+   Databox    *pressatminfs;
+   char       *filename = "pressure minFS";
+   char        pressatminfs_hashkey[MAX_KEY_SIZE];
+  
+
+   /* Check and see if there are enough arguments following  */
+   /* the command.                                           */
+   if (argc <= 3)
+   {
+      printf("Number of arguments = %d\n", argc);
+      WrongNumArgsError(interp, PRESSATFSMINUSAGE);
+      return TCL_ERROR;
+   }
+
+   int k;
+   for (k = 0; k < argc; k++) {
+    
+     printf("Output of argv[%d]= %s \n", k, argv[k]);
+   }
+   factor_safety_hashkey = argv[1];
+   pressure_hashkey = argv[2];
+   top_hashkey = argv[3];
+
+   /* int checkVal = DataTotalMem(data);
+   printf("Total number of members in the hashtable: %d\n", checkVal); */
+   
+   if ((factor_safety = DataMember(data, factor_safety_hashkey, entryPtr)) == NULL)
+   {
+      SetNonExistantError(interp, factor_safety_hashkey);
+      return TCL_ERROR;
+   }
+
+   if ((pressure = DataMember(data, pressure_hashkey, entryPtr)) == NULL)
+   {
+      SetNonExistantError(interp, pressure_hashkey);
+      return TCL_ERROR;
+   }
+
+   if ((top = DataMember(data, top_hashkey, entryPtr)) == NULL)
+   {
+      SetNonExistantError(interp, top_hashkey);
+      return TCL_ERROR;
+   }
+
+    
+   {
+      int nx = DataboxNx(factor_safety);
+      int ny = DataboxNy(factor_safety);
+      int nz = 1;
+
+      double x = DataboxX(factor_safety);
+      double y = DataboxY(factor_safety);
+      double z = DataboxZ(factor_safety);
+      
+      double dx = DataboxDx(factor_safety);
+      double dy = DataboxDy(factor_safety);
+      double dz = DataboxDz(factor_safety);
+     
+      printf("nx = %d, ny = %d, dx = %f, dy = %f, dz = %f\n", nx, ny, dx, dy, dz);
+      /* create the new databox structure for the depth where factor of safety is minimum  */
+      if ( (pressatminfs = NewDatabox(nx, ny, 1, x, y, z, dx, dy, dz)) )
+      {
+    /* Make sure the data set pointer was added to */
+    /* the hash table successfully.                */
+    if (!AddData(data, pressatminfs, filename, pressatminfs_hashkey)) {
+       printf("Right before call to FreeDatabox");
+       FreeDatabox(pressatminfs); 
+    } else
+    {
+       Tcl_AppendElement(interp, pressatminfs_hashkey); 
+    } 
+
+    ComputePressatFSMin(factor_safety, pressure, top, pressatminfs);
+    /*printf("Error in free() happens after this point 1");*/
+      }
+      else
+      {
+    ReadWriteError(interp);
+    return TCL_ERROR;
+      }
+   }
+
+   /*printf("Error in free() happens after this point 2");*/
+   return TCL_OK;
+}
