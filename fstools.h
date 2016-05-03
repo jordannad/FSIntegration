@@ -75,6 +75,8 @@ int FSExtractTopCommand P((ClientData clientData , Tcl_Interp *interp , int argc
 int SaveFSCommand P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
 int ZatFSMinCommand P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
 int PressatFSMinCommand P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
+int LuLikosFSCommand P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
+
 #undef P
 
 #endif
