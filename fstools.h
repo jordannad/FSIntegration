@@ -76,6 +76,7 @@ int SaveFSCommand P((ClientData clientData , Tcl_Interp *interp , int argc , cha
 int ZatFSMinCommand P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
 int PressatFSMinCommand P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
 int LuLikosFSCommand P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
+int FSWithRootStrengthCommand P((ClientData clientData , Tcl_Interp *interp , int argc , char *argv []));
 
 #undef P
 

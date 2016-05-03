@@ -65,5 +65,6 @@ namespace eval FactorSafety {
     namespace export getzatfsmin
     namespace export computepressatfsmin
     namespace export getlulikosfs
+    namespace export getfswithrootstrength
 }
 

@@ -142,6 +142,8 @@ EXPORT(int,Factorsafety_Init)(Tcl_Interp *interp)
                      (ClientData) data, (Tcl_CmdDeleteProc *) NULL);
    Tcl_CreateCommand(interp, "FactorSafety::getlulikosfs", (Tcl_CmdProc *)LuLikosFSCommand,
                      (ClientData) data, (Tcl_CmdDeleteProc *) NULL);
+   Tcl_CreateCommand(interp, "FactorSafety::getfswithrootstrength", (Tcl_CmdProc *)FSWithRootStrengthCommand,
+                     (ClientData) data, (Tcl_CmdDeleteProc *) NULL);
    
 #ifdef SGS
    Tcl_CreateExitHandler((Tcl_ExitProc *)PFTExitProc, (ClientData) data);
