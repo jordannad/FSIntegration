@@ -51,6 +51,19 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
    Databox *factor_safety,
    double failureDepth);
 
+void GetFSSuctionComp(Databox *alpha, Databox *n, Databox *theta_resid, Databox *theta_sat,
+   Databox *cohesion,
+   Databox *porosity,
+   Databox *friction_angle,
+   Databox *top,
+   Databox *slope_x,
+   Databox *slope_y,
+   Databox *pressure, 
+   Databox *saturation,
+   Databox *uws_sat,
+   Databox *factor_safety,
+   double failureDepth);
+
 void ComputeFSWithRootStrength(Databox *alpha, Databox *n, Databox *theta_resid, Databox *theta_sat,
    Databox *cohesion,
    Databox *root_cohesion,

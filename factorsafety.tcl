@@ -66,5 +66,6 @@ namespace eval FactorSafety {
     namespace export computepressatfsmin
     namespace export getlulikosfs
     namespace export getfswithrootstrength
+    namespace export getfssuctioncomp
 }
 
