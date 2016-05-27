@@ -91,6 +91,7 @@ void ComputeFactorSafety(Databox *alpha, Databox *n, Databox *theta_resid, Datab
 
          if ((i == 1) && (j == 1)) {
                printf("Printing at i = 1, j = 1, top = %d\n", k_top);
+               
          }
          /* Loop over the top soil layers for which FOS calcs are to be performed */
          for (k = k_top; k >= (k_top - fs_nz); k--) {
@@ -113,7 +114,7 @@ void ComputeFactorSafety(Databox *alpha, Databox *n, Databox *theta_resid, Datab
             theta_resid_val = *(DataboxCoeff(theta_resid, i, j, k));
 	    uws_val = *(DataboxCoeff(uws_sat, i, j, k));
             cohesion_val = *(DataboxCoeff(cohesion, i, j, k));
-
+            
             /* Component to assist calculation of depth averaged unit weight */
             gs = (uws_val/uww - porosity_val)/(1 - porosity_val);
 	    
@@ -125,12 +126,18 @@ void ComputeFactorSafety(Databox *alpha, Databox *n, Databox *theta_resid, Datab
 	     /* Calculate unit weight of the soil for partially saturated conditions */
 	     if (press < 0.) {
 		uws = (gs*(1- porosity_val) + moisture_content)*uww;
+                if ((i == 1) && (j == 1)) {
+                  printf("Pressure less than zero: %f. UWS: %f\n", press, uws);
+                }
  	     } else {
                 uws = uws_val;
+                if ((i == 1) && (j == 1)) {
+                  printf("Pressure greater than zero: %f. UWS: %f\n", press, uws);
+                }
              }
              uwssum = uwssum + uws;
 	     uws_depth = uwssum/(depth/dz);
-
+             uws_depth = 22000;
              /* Check if slope is too flat */
              if (fabs(slope) < 1.0e-5) {
                 ff = fs_inf;
@@ -140,7 +147,15 @@ void ComputeFactorSafety(Databox *alpha, Databox *n, Databox *theta_resid, Datab
              }
 
 	     /* Consistent with TRIGRS implementation */
-             if ((abs(a1) > 1.0e-5) && (k != k_top)) {
+             if ((i == 1) && (j == 1)) {
+               printf("a1 = %f, k = %d, ktop = %d, absa1 = %f\n", a1, k, k_top, abs(a1));
+               if (fabs(a1) > 0.00001) {
+                  printf("Abs a1 greater than num m2\n");
+               } else {
+                  printf("Abs a1 less than num \n");
+               }
+             }
+             if ((fabs(a1) > 0.00001) && (k != k_top)) {
 
                 /* Initialize Bishop's fs correction for saturated conditions */
                 chi = 1.0;
@@ -158,15 +173,19 @@ void ComputeFactorSafety(Databox *alpha, Databox *n, Databox *theta_resid, Datab
                 fc = cohesion_val/(uws_depth*depth*a1*b1);
 
               } else {
+                if ((i == 1) && (j == 1)) printf("Here setting fw to 0\n");
                 fw = 0.0;
                 fc = 0.0;
               }
               factor_safety_val = ff + fw + fc;
-
+              if ((i == 1) && (j == 1)) {
+               /*printf("Printing depth at i = 1, j = 1, Depth = %f\n", depth);*/
+               printf("Cohesion: %f, First comp: %f, UWS: %f, Slope = %f, Pressure = %f, Chi = %f, FSVal = %f\n", cohesion_val, ff, uws_depth, slope, press, chi, factor_safety_val);
+              }
                /* Frictional strength cannot be less than zero */
               if ((ff + fw) < 0.) {
                   factor_safety_val = fc;
-                  printf("Got here (ff + fw) < 0. on i = %d, j = %d\n", i, j);
+                  /*printf("Got here (ff + fw) < 0. on i = %d, j = %d\n", i, j);*/
               }
               if (factor_safety_val > fs_inf) {
                  factor_safety_val = fs_inf;
@@ -295,7 +314,7 @@ void ComputePressatFSMin(Databox *factor_safety, Databox *pressure, Databox *top
             
  	    factor_safety_val = *(DataboxCoeff(factor_safety, i, j, fs_k));
             pressure_val = *(DataboxCoeff(pressure, i, j, k));
-
+            
             if (factor_safety_val < fs_min) {
                fs_min = factor_safety_val;
                p_min = pressure_val;
@@ -433,6 +452,7 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
                 ff = tan(fric_angle*dg2rad)/tan(slope*dg2rad);
              }
 
+
 	     /* Consistent with TRIGRS implementation */
              if ((abs(a1) > 1.0e-5) && (k != k_top)) {
 
@@ -460,7 +480,10 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
                 fc = 0.0;
               }
               factor_safety_val = ff + fw + fc;
-
+              if ((i == 1) && (j == 1)) {
+               /*printf("Printing depth at i = 1, j = 1, Depth = %f\n", depth);*/
+               printf("Cohesion: %f, First comp: %f, UWS: %f, Slope = %f, Pressure = %f, FSVal = %f\n", cohesion_val, ff, uws_depth, slope, press, factor_safety_val);
+              }
                /* Frictional strength cannot be less than zero */
               if ((ff + fw) < 0.) {
                   factor_safety_val = fc;
