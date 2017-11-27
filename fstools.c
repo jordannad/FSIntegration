@@ -51,7 +51,7 @@
 #include "printdatabox.h"
 #include "fstools.h"
 #include "factorsafety.h"
-#include <tcl.h>
+#include <tcl/tcl.h>
 #include "grid.h"
 #include "error.h"
 #include "general.h"

@@ -9,7 +9,7 @@
 
 #include "databox.h"
 
-#include <tcl.h>
+#include <tcl/tcl.h>
 #include <string.h>
 
 /*-----------------------------------------------------------------------

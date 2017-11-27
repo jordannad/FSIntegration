@@ -29,7 +29,7 @@
 #ifndef _USERGRID_HEADER
 #define _USERGRID_HEADER
 
-#include <tcl.h>
+#include <tcl/tcl.h>
 #include "grid.h"
 
 /*--------------------------------------------------------------------------

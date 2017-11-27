@@ -44,7 +44,7 @@
 #include <hdf.h>
 #endif
 
-#include <tcl.h>
+#include <tcl/tcl.h>
 
 #ifndef NULL
 #define NULL ((void *)0)

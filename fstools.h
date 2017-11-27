@@ -15,7 +15,7 @@
 #include <hdf.h>
 #endif
 
-#include <tcl.h>
+#include <tcl/tcl.h>
 
 #include "databox.h"
 
