@@ -428,8 +428,8 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
             cohesion_val = *(DataboxCoeff(cohesion, i, j, k));
 
             /* Component to assist calculation of depth averaged unit weight */
-            gs = (uws_val/uww - porosity_val)/(1 - porosity_val);
-	    
+            /* gs = (uws_val/uww - porosity_val)/(1 - porosity_val); */
+	          gs = 2.67;
 
             /* These two values are currently unused */
             alpha_val = *(DataboxCoeff(alpha, i, j, k));
@@ -437,7 +437,8 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
            
 	     /* Calculate unit weight of the soil for partially saturated conditions */
 	     if (press < 0.) {
-		uws = (gs*(1- porosity_val) + moisture_content)*uww;
+		/* uws = (gs*(1- porosity_val) + moisture_content)*uww; */
+        uws = (1 - moisture_content)*gs*uww + moisture_content*uww;
  	     } else {
                 uws = uws_val;
              }
@@ -456,7 +457,7 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
 	     /* Consistent with TRIGRS implementation */
              if ((fabs(a1) > 0.00001) && (k != k_top)) {
                if ((i == 1) && (j == 1)) {
-                 printf("Got into abs a1 and k inner loop at depth = %f\n", depth);
+                 /* printf("Got into abs a1 and k inner loop at depth = %f\n", depth); */
                }
                 /* Initialize Bishop's fs correction for saturated conditions */
                 chi = 1.0;
@@ -473,21 +474,18 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
                 /*fw = -(chi * press * uww * tan(fric_angle*dg2rad))/(uws_depth*a1*b1*depth);*/
                 fw = (-1.0*suctionstress)*(tan(slope*dg2rad) + (1.0/tan(slope*dg2rad)))*tan(fric_angle*dg2rad)/(uws_depth*depth);
                 fc = (2*cohesion_val)/(uws_depth*depth*sin(2*slope*dg2rad));
-		if ((i == 5) && (j == 5)) {
-                  double sstressfac = 1/(pow((1 + pow((alpha_val*press*uww),n_val)),((n_val-1)/n_val)));
-                  printf("Chi factor: %f vs. suction stress: %f\n", chi, sstressfac);
-                }
+		/* if ((i == 5) && (j == 5)) {
+                  double sstressfac = 1/(pow((1 + pow((alpha_val*press*uww),n_val)),((n_val-1)/n_val))); 
+                  printf("Chi factor: %f vs. suction stress: %f\n", chi, sstressfac); 
+                } */
               } else {
                 fw = 0.0;
                 fc = 0.0;
               }
-              if ((i == 1) && (j == 1)) {
-                 printf("Printing fw = %f and fc = %f\n", fw, fc);
-               }
               factor_safety_val = ff + fw + fc;
               if ((i == 1) && (j == 1)) {
                /*printf("Printing depth at i = 1, j = 1, Depth = %f\n", depth);*/
-               printf("Cohesion: %f, First comp: %f, UWS: %f, Slope = %f, Pressure = %f, FSVal = %f\n", cohesion_val, ff, uws_depth, slope, press, factor_safety_val);
+               printf("Cohesion: %f, First comp: %f, fw: %f, fc: %f, UWS: %f, Slope = %f, Pressure = %f, FSVal = %f\n", cohesion_val, ff, fw, fc, uws_depth, slope, press, factor_safety_val);
               }
                /* Frictional strength cannot be less than zero */
               if ((ff + fw) < 0.) {
