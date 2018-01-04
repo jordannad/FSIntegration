@@ -454,7 +454,7 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
 
 
 	     /* Consistent with TRIGRS implementation */
-             if ((abs(a1) > 1.0e-5) && (k != k_top)) {
+             if ((fabs(a1) > 0.00001) && (k != k_top)) {
                if ((i == 1) && (j == 1)) {
                  printf("Got into abs a1 and k inner loop at depth = %f\n", depth);
                }
