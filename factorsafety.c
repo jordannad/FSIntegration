@@ -455,7 +455,9 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
 
 	     /* Consistent with TRIGRS implementation */
              if ((abs(a1) > 1.0e-5) && (k != k_top)) {
-
+               if ((i == 1) && (j == 1)) {
+                 printf("Got into abs a1 and k inner loop at depth = %f\n", depth);
+               }
                 /* Initialize Bishop's fs correction for saturated conditions */
                 chi = 1.0;
 		/* Adjust chi if we have unsaturated conditions */
@@ -479,6 +481,9 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
                 fw = 0.0;
                 fc = 0.0;
               }
+              if ((i == 1) && (j == 1)) {
+                 printf("Printing fw = %f and fc = %f\n", fw, fc);
+               }
               factor_safety_val = ff + fw + fc;
               if ((i == 1) && (j == 1)) {
                /*printf("Printing depth at i = 1, j = 1, Depth = %f\n", depth);*/
