@@ -94,9 +94,9 @@ void ComputeFactorSafety(Databox *alpha, Databox *n, Databox *theta_resid, Datab
                
          }
          /* Loop over the top soil layers for which FOS calcs are to be performed */
-         for (k = k_top; k >= (k_top - fs_nz); k--) {
-	    depth = (k_top - k)*dz; /*Depth below the surface */
-            fsDataBoxZ = fs_nz - (k_top - k);
+         for (k = k_top; k > (k_top - fs_nz); k--) {
+	    depth = (k_top - k)*dz + (dz/2.0); /*Depth below the surface */
+            fsDataBoxZ = (fs_nz-1) - (k_top - k);
             if ((i == 1) && (j == 1)) {
                printf("Printing at i = 1, j = 1, fsDataBoxnz = %d\n", fsDataBoxZ);
          }
@@ -113,10 +113,12 @@ void ComputeFactorSafety(Databox *alpha, Databox *n, Databox *theta_resid, Datab
 	    theta_sat_val = *(DataboxCoeff(theta_sat, i, j, k));
             theta_resid_val = *(DataboxCoeff(theta_resid, i, j, k));
 	    uws_val = *(DataboxCoeff(uws_sat, i, j, k));
+      uws_val = 22000;
             cohesion_val = *(DataboxCoeff(cohesion, i, j, k));
             
             /* Component to assist calculation of depth averaged unit weight */
-            gs = (uws_val/uww - porosity_val)/(1 - porosity_val);
+            e = porosity_val/(1 - porosity_val);
+            gs = (((1+e)*uws_val)/uww - e);
 	    
 
             /* These two values are currently unused */
@@ -125,7 +127,7 @@ void ComputeFactorSafety(Databox *alpha, Databox *n, Databox *theta_resid, Datab
            
 	     /* Calculate unit weight of the soil for partially saturated conditions */
 	     if (press < 0.) {
-		uws = (gs*(1- porosity_val) + moisture_content)*uww;
+		uws = (uww*(gs+ (e*(moisture_content/porosity_val))))/(1+e);
                 if ((i == 1) && (j == 1)) {
                   printf("Pressure less than zero: %f. UWS: %f\n", press, uws);
                 }
@@ -136,8 +138,8 @@ void ComputeFactorSafety(Databox *alpha, Databox *n, Databox *theta_resid, Datab
                 }
              }
              uwssum = uwssum + uws;
-	     uws_depth = uwssum/(depth/dz);
-             uws_depth = 22000;
+	     uws_depth = uwssum/((depth+(dz/2.0))/dz);
+             
              /* Check if slope is too flat */
              if (fabs(slope) < 1.0e-5) {
                 ff = fs_inf;
@@ -155,17 +157,17 @@ void ComputeFactorSafety(Databox *alpha, Databox *n, Databox *theta_resid, Datab
                   printf("Abs a1 less than num \n");
                }
              }
-             if ((fabs(a1) > 0.00001) && (k != k_top)) {
+             if ((fabs(a1) > 0.00001)) {
 
                 /* Initialize Bishop's fs correction for saturated conditions */
                 chi = 1.0;
 		/* Adjust chi if we have unsaturated conditions */
                 if (press < 0.) {
                   chi = (moisture_content - theta_resid_val)/(porosity_val - theta_resid_val);
-                  suctionstress = (-1*press)/(pow((1 + pow((alpha_val*press),n_val)),((n_val-1)/n_val)));
+                  /* suctionstress = (-1*press)/(pow((1 + pow((alpha_val*press),n_val)),((n_val-1)/n_val))); */
                 } else {
                   chi = 1.0;
-                  suctionstress = -1*press;
+                  /* suctionstress = -1*press; */
                 } 
 
                 /* Compute the other factor of safety components */ 
@@ -407,7 +409,7 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
          }
          /* Loop over the top soil layers for which FOS calcs are to be performed */
          for (k = k_top; k > (k_top - fs_nz); k--) {
-	    depth = (k_top - k)*dz + 0.0625; /*Depth below the surface */
+	    depth = (k_top - k)*dz + (dz/2.0); /*Depth below the surface */
             fsDataBoxZ = (fs_nz-1) - (k_top - k);
             if ((i == 1) && (j == 1)) {
                printf("Printing at i = 1, j = 1, fsDataBoxnz = %d\n", fsDataBoxZ);
@@ -445,7 +447,7 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
                 uws = uws_val;
              }
              uwssum = uwssum + uws;
-	     uws_depth = uwssum/((depth+0.0625)/dz);
+	     uws_depth = uwssum/((depth+(dz/2.0))/dz);
 
              /* Check if slope is too flat */
              if (fabs(slope) < 1.0e-5) {
