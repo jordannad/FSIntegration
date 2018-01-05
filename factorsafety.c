@@ -429,7 +429,7 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
 
             /* Component to assist calculation of depth averaged unit weight */
             e = porosity_val/(1 - porosity_val);
-            gs = ((1+e)*uws_val)/uww - e
+            gs = (((1+e)*uws_val)/uww - e);
             /*gs = ((uws_val/uww - porosity_val)/(1 - porosity_val);) */
 	          /*gs = 2.67; */
 
