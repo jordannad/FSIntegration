@@ -364,7 +364,7 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
    fs_inf = 10.0;
 
    /* Components of factor of safety calculation */
-   double	  a1, b1, slope, chi, uws, uws_val, uwssum, depth, uws_depth, gs;
+   double	  a1, b1, slope, chi, uws, uws_val, uwssum, depth, uws_depth, e, gs;
    double         suctionstress, ff, fw, fc;
    double 	  theta_sat_val, theta_resid_val, alpha_val, n_val, saturation_val, fric_angle, press, factor_safety_val, porosity_val, cohesion_val;
    double uww = 9801;
@@ -406,9 +406,9 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
                printf("Printing at i = 1, j = 1, top = %d\n", k_top);
          }
          /* Loop over the top soil layers for which FOS calcs are to be performed */
-         for (k = k_top; k >= (k_top - fs_nz); k--) {
-	    depth = (k_top - k)*dz; /*Depth below the surface */
-            fsDataBoxZ = fs_nz - (k_top - k);
+         for (k = k_top; k > (k_top - fs_nz); k--) {
+	    depth = (k_top - k)*dz + 0.0625; /*Depth below the surface */
+            fsDataBoxZ = (fs_nz-1) - (k_top - k);
             if ((i == 1) && (j == 1)) {
                printf("Printing at i = 1, j = 1, fsDataBoxnz = %d\n", fsDataBoxZ);
          }
@@ -428,8 +428,10 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
             cohesion_val = *(DataboxCoeff(cohesion, i, j, k));
 
             /* Component to assist calculation of depth averaged unit weight */
-            /* gs = (uws_val/uww - porosity_val)/(1 - porosity_val); */
-	          gs = 2.67;
+            e = porosity_val/(1 - porosity_val);
+            gs = ((1+e)*uws_val)/uww - e
+            /*gs = ((uws_val/uww - porosity_val)/(1 - porosity_val);) */
+	          /*gs = 2.67; */
 
             /* These two values are currently unused */
             alpha_val = *(DataboxCoeff(alpha, i, j, k));
@@ -438,12 +440,12 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
 	     /* Calculate unit weight of the soil for partially saturated conditions */
 	     if (press < 0.) {
 		/* uws = (gs*(1- porosity_val) + moisture_content)*uww; */
-        uws = (1 - moisture_content)*gs*uww + moisture_content*uww;
+        uws = (uww*(gs+ (e*(moisture_content/porosity_val))))/(1+e);
  	     } else {
                 uws = uws_val;
              }
              uwssum = uwssum + uws;
-	     uws_depth = uwssum/(depth/dz);
+	     uws_depth = uwssum/((depth+0.0625)/dz);
 
              /* Check if slope is too flat */
              if (fabs(slope) < 1.0e-5) {
@@ -455,7 +457,7 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
 
 
 	     /* Consistent with TRIGRS implementation */
-             if ((fabs(a1) > 0.00001) && (k != k_top)) {
+             if ((fabs(a1) > 0.00001)) {
                if ((i == 1) && (j == 1)) {
                  /* printf("Got into abs a1 and k inner loop at depth = %f\n", depth); */
                }
@@ -485,7 +487,7 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
               factor_safety_val = ff + fw + fc;
               if ((i == 1) && (j == 1)) {
                /*printf("Printing depth at i = 1, j = 1, Depth = %f\n", depth);*/
-               printf("Cohesion: %f, First comp: %f, fw: %f, fc: %f, UWS: %f, Slope = %f, Pressure = %f, FSVal = %f\n", cohesion_val, ff, fw, fc, uws_depth, slope, press, factor_safety_val);
+               printf("Cohesion: %f, First comp: %f, fw: %f, fc: %f, UWS: %f, Slope = %f, Pressure = %f, moistureC = %f, FSVal = %f\n", cohesion_val, ff, fw, fc, uws_depth, slope, press, moisture_content, factor_safety_val);
               }
                /* Frictional strength cannot be less than zero */
               if ((ff + fw) < 0.) {
