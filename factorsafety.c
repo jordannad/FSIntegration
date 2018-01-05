@@ -47,7 +47,7 @@ void ComputeFactorSafety(Databox *alpha, Databox *n, Databox *theta_resid, Datab
    fs_inf = 10.0;
 
    /* Components of factor of safety calculation */
-   double	  a1, b1, slope, chi, uws, uws_val, uwssum, depth, uws_depth, gs;
+   double	  a1, b1, slope, chi, uws, uws_val, uwssum, depth, uws_depth, e, gs;
    double         suctionstress, ff, fw, fc, fs_min, z_fsmin, p_min; 
    double 	  theta_sat_val, theta_resid_val, alpha_val, n_val, saturation_val, fric_angle, press, factor_safety_val, porosity_val, cohesion_val;
    double uww = 9801;
