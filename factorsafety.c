@@ -398,7 +398,7 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
          /* If k is non-negative then we can proceed */
 	 /* For now, all of the examples will guarantee horizontal x-y cells */
 	     
-
+         if (k_top > 0) {
          /* Initialize result variables */
          uwssum = 0.0;
   	 double moisture_content;
@@ -501,6 +501,11 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
               }      
            *(DataboxCoeff(factor_safety, i, j, fsDataBoxZ)) = factor_safety_val;
 	   } 
+   } else {
+      for (l = 0; l < fs_nz; l++) {
+        *(DataboxCoeff(factor_safety, i, j, l)) = fs_inf;
+      }
+   }
       }
    }
 }
