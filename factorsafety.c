@@ -345,7 +345,7 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
    Databox *factor_safety,
    double failureDepth)
 {
-   int             i,  j,  k;
+   int             i,  j,  k, l;
    int             nx, ny, nz;
    double          dx, dy, dz;
 
