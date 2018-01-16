@@ -416,7 +416,7 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
          }
             /* Testing depth- confirms looping from surface to 3.0m below everywhere*/
 
-            if ((i == 1) && (j == 1)) {
+            if ((i == 32) && (j == 31)) {
                printf("Printing depth at i = 1, j = 1, Depth = %f\n", depth);
             }
             /*Get values from input datasets */
@@ -487,7 +487,7 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
                 fc = 0.0;
               }
               factor_safety_val = ff + fw + fc;
-              if ((i == 1) && (j == 1)) {
+              if ((i == 32) && (j == 31)) {
                /*printf("Printing depth at i = 1, j = 1, Depth = %f\n", depth);*/
                printf("Cohesion: %f, First comp: %f, fw: %f, fc: %f, UWS: %f, Slope = %f, Pressure = %f, moistureC = %f, FSVal = %f\n", cohesion_val, ff, fw, fc, uws_depth, slope, press, moisture_content, factor_safety_val);
               }
