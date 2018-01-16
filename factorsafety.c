@@ -382,8 +382,8 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
          /* 
           * Calculate the overall slope for a single cell at the top of the domain.
          */
-         slopexVal = (*DataboxCoeff(slope_x, i, j, 0))
-         slopeyVal = (*DataboxCoeff(slope_y, i, j, 0))
+         slopexVal = (*DataboxCoeff(slope_x, i, j, 0));
+         slopeyVal = (*DataboxCoeff(slope_y, i, j, 0));
          slopeoverall = sqrt(pow(*DataboxCoeff(slope_x, i, j, 0),2.0) + 
 			pow(*DataboxCoeff(slope_y,i,j,0),2.0));
          slope = (atan(slopeoverall))*(180.0/3.14159265); /*Slope in degrees */
