@@ -370,7 +370,7 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
    double         suctionstress, ff, fw, fc;
    double 	  theta_sat_val, theta_resid_val, alpha_val, n_val, saturation_val, fric_angle, press, factor_safety_val, porosity_val, cohesion_val;
    double uww = 9801;
-   double slopeoverall;
+   double slopeoverall, slopexVal, slopeyVal;
    double dg2rad = 3.14159265/180; /*Convert an angle in degrees to radians */
 
    /* Loop over all surface cells (first i (x) then j (y) direction) */
@@ -382,9 +382,16 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
          /* 
           * Calculate the overall slope for a single cell at the top of the domain.
          */
+         slopexVal = (*DataboxCoeff(slope_x, i, j, 0))
+         slopeyVal = (*DataboxCoeff(slope_y, i, j, 0))
          slopeoverall = sqrt(pow(*DataboxCoeff(slope_x, i, j, 0),2.0) + 
 			pow(*DataboxCoeff(slope_y,i,j,0),2.0));
          slope = (atan(slopeoverall))*(180.0/3.14159265); /*Slope in degrees */
+         if ((i == 31) && (j == 30)) {
+               printf("Printing at i = 31, j = 30, slopex = %f, slopey = %f\n", slopexVal, slopeyVal);
+               printf("Printing at i = 31, j = 30, slopeoverall = %f, slope (deg) = %f\n", slopeoverall, slope);
+
+         }
          /*printf("Printing slopes, i = %d, j = %d, slope (degrees) = %f\n", i, j, slope);*/
          a1 = sin(slope*dg2rad); /*Calculate sin of angle in radians */
          b1 = cos(slope*dg2rad); 
