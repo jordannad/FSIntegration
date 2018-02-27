@@ -475,7 +475,7 @@ void ComputeLuLikosFS(Databox *alpha, Databox *n, Databox *theta_resid, Databox 
 		/* Adjust chi if we have unsaturated conditions */
                 if (press < 0.) {
                   chi = (moisture_content - theta_resid_val)/(porosity_val - theta_resid_val);
-                  suctionstress = (press*uww)/(pow((1.0 + pow((-1.0*alpha_val*press*uww),n_val)),((n_val-1)/n_val)));
+                  suctionstress = (press*uww)/(pow((1.0 + pow((-1.0*alpha_val*press),n_val)),((n_val-1)/n_val)));
                 } else {
                   chi = 1.0;
                   suctionstress = press*uww;
